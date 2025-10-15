@@ -1,5 +1,5 @@
 # COSC484
-Dating app
+Dating app - Spark
 
 #### Members:
 Abdul, Jasha, Mamadou, Moriah, Nate
