@@ -24,3 +24,55 @@ You can also have your contact info saved so you can quick send during a live ch
 - Authentification (sign in with google)? JWT (handles username/password)?
 - Python backend server (connecting users to each other, handles api route endpoints,
 posting/updating/deleting pictures and information from your profile)
+
+
+# Development Environment
+## API Backend
+### Linux/MacOS
+```bash
+cd api
+python -m venv .venv
+pip install -r requirements.txt
+source .venv/bin/activate 
+```
+
+### Windows
+```powershell
+cd api
+python -m venv .venv
+pip install -r requirements.txt
+.venv/Scripts/activate 
+```
+
+### Set Environment Variables in /api
+Use database information in the following format:
+```bash
+user={}
+password={}
+host={}
+port={} 
+dbname={}
+```
+
+### Running the API
+```bash
+fastapi dev main.py
+```
+
+
+## Svelte Frontend
+### Install Dependencies
+```bash
+cd spark-app
+npm install
+```
+
+### Start Development Server
+```bash
+npm run dev
+```
+
+### Connect via Browser URL
+```
+http://localhost:5173
+```
