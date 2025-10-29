@@ -1,17 +1,55 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from services.db import get_db
 from services.sms import send_otp, verify_otp
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.get("/otp")
-def send(phone: str):
+"""This is used to add a newly authenticated user to the users db table if they aren't already added"""
+def _register_user_phone(user_data, db: Session):
+
+    uid: str = user_data.get("id")
+    
+    # Check whether or not user already exists
+    exists = db.execute(text("select 1 from public.users where id = :id limit 1"), {"id": uid}).scalar()
+    if exists:
+        return
+    
+    provider: str = user_data.get("app_metadata").get("provider") # enum {phone, email}
+    created_at: str = user_data.get("created_at") # tz
+
+    if provider == "phone":
+        phone: str = user_data.get("phone") 
+        # If phone is present, ensure it is not taken
+        if phone:
+            claimed_by = db.execute(text("select id from public.users where phone = :phone limit 1"), {"phone": phone}).scalar()
+            if claimed_by:
+                raise HTTPException(409, "Phone already registered to another account")
+        
+        # Add new user
+        db.execute(
+            text("""
+                insert into public.users (id, phone, created_at)
+                values (:id, :phone, now())
+            """),
+            {"id": uid, "phone": phone},
+        )
+
+        print(uid, provider, created_at, phone)
+
+
+"""This sends a "short-code" (6 digits) to the desired phone number. Phone must be in 10 digit format (prefix +1)"""
+@router.get("/phone")
+def send_phone_otp(phone: str):
     res = send_otp(phone=phone) # handles validity already
     return res
 
-@router.post("/otp")
-def verify(phone: str, code: str):
+"""This will return an access token that the frontend will use to provide the backend for CRUD operations"""
+@router.post("/phone")
+def verify_phone_otp(phone: str, code: str, db: Session = Depends(get_db)):
     res = verify_otp(phone=phone, code=code) # handles validity already
+    user_data = jsonable_encoder(res).get("user")
+    _register_user_phone(user_data=user_data, db=db)
     return res
