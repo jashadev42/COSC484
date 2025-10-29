@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from services.db import get_db
-from services.sms import send_otp, verify_otp
+from services.otp import send_otp, verify_otp
 from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -51,5 +51,5 @@ def send_phone_otp(phone: str):
 def verify_phone_otp(phone: str, code: str, db: Session = Depends(get_db)):
     res = verify_otp(phone=phone, code=code) # handles validity already
     user_data = jsonable_encoder(res).get("user")
-    _register_user_phone(user_data=user_data, db=db)
+    _register_user_phone(user_data=user_data, db=db) # register potentially new user to users db table if not already
     return res
