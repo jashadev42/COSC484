@@ -5,27 +5,34 @@ from services.db import get_db
 from services.otp import send_otp, verify_otp
 from fastapi.encoders import jsonable_encoder
 
+from user import _user_exists
+from services.auth import auth_user
+
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+def _check_phone_claimed(phone: str, db: Session) -> bool:
+    stmt = text("SELECT id from public.users WHERE phone = :phone LIMIT 1")
+    claimed_by = db.execute(stmt, {"phone": phone}).scalar()
+    return True if claimed_by else False
 
 """This is used to add a newly authenticated user to the users db table if they aren't already added"""
 def _register_user_phone(user_data, db: Session):
-
     uid: str = user_data.get("id")
     
     # Check whether or not user already exists
-    exists = db.execute(text("select 1 from public.users where id = :id limit 1"), {"id": uid}).scalar()
+    exists = _user_exists(uid=uid, db=db)
     if exists:
         return
     
     provider: str = user_data.get("app_metadata").get("provider") # enum {phone, email}
-    created_at: str = user_data.get("created_at") # tz
+    created_at: str = user_data.get("created_at") # timestamptz
 
     if provider == "phone":
         phone: str = user_data.get("phone") 
         # If phone is present, ensure it is not taken
         if phone:
-            claimed_by = db.execute(text("select id from public.users where phone = :phone limit 1"), {"phone": phone}).scalar()
-            if claimed_by:
+            phone_claimed = _check_phone_claimed(phone=phone, db=db)
+            if phone_claimed:
                 raise HTTPException(409, "Phone already registered to another account")
         
         # Add new user

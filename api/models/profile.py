@@ -24,7 +24,7 @@ from enums.smoke_frequency import SmokeFrequencyEnum
 from enums.sleep_schedule import SleepScheduleEnum
 from enums.zodiac_signs import ZodiacSignsEnum 
 
-class UserProfile(BaseModel):
+class UserProfileSchema(BaseModel):
     uid: UUID
     created_at: Optional[datetime] = None
 
