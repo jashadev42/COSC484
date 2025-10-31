@@ -60,7 +60,7 @@ fastapi dev main.py
 ```
 
 
-## Svelte Frontend
+## Frontend
 ### Install Dependencies
 ```bash
 cd spark-app
@@ -74,5 +74,5 @@ npm run dev
 
 ### Connect via Browser URL
 ```
-http://localhost:5173
+http://localhost:3000
 ```
