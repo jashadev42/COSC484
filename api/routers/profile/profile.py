@@ -5,17 +5,17 @@ from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
 from routers.user import _user_exists
-from routers.profile import gender, interest
+from routers.profile import gender, interests
 
 from models.profile import UserProfileSchema
 
 from routers.profile.gender import _gender_name_to_uuid
-from routers.profile.interest import _update_user_interests
+from routers.profile.interests import _update_profile_interests
 
-router = APIRouter(prefix="/profile", tags=["profile"])
+router = APIRouter(prefix="/profile", tags=["Profile"])
 
 router.include_router(gender.router)
-router.include_router(interest.router)
+router.include_router(interests.router)
 
 def _profile_exists(uid: int, db: Session):
     exists = db.execute(text("SELECT 1 FROM public.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).scalar()
@@ -27,7 +27,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
     payload = jsonable_encoder(payload)
     if(_profile_exists): return HTTPException(status_code=409, detail=f"Profile for user with uid '{uid}' is already created! Update it to make changes.")
 
-    _update_user_interests(payload=payload.get("interests"), uid=uid, db=db)
+    _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
     gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
 
     # Not finished with this
@@ -130,7 +130,7 @@ def update_profile(
         raise HTTPException(status_code=404, detail=f"User with id '{uid}' does not exist!")
 
     payload = jsonable_encoder(payload)
-    _update_user_interests(payload=payload.get("interests"), uid=uid, db=db)
+    _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
     gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
 
     stmt = text("""

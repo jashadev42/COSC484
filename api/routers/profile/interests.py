@@ -11,7 +11,7 @@ from models.enums.interests import InterestsEnum
 from typing import List
 
 
-router = APIRouter(prefix="/interest", tags=["interest"])
+router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 
 # PRIVATE HELPERS
 
@@ -26,10 +26,18 @@ def _interests_to_uuid_arr(arr: List[str], db: Session) -> List[str]:
         res.append(uuid)
     return res
 
-def _update_user_interests(payload: List[InterestsEnum], uid: str, db: Session):
+def _get_all_interest_options(db: Session):
+    all = db.execute(text("SELECT * FROM public.interests")).mappings().all()
+    return all
+
+def _get_profile_interests(uid: str, db: Session):
+    all = db.execute(text("SELECT * FROM public.interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
+    return all
+
+def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Session):
     payload = jsonable_encoder(payload)
     interest_ids = _interests_to_uuid_arr(payload, db=db) # List of str
-    _delete_user_interests(uid=uid, db=db) # Delete existing user interests for said user
+    _delete_profile_interests(uid=uid, db=db) # Delete existing user interests for said user
 
     for interest_id in interest_ids:
         stmt = text("""
@@ -38,33 +46,34 @@ def _update_user_interests(payload: List[InterestsEnum], uid: str, db: Session):
         """)
         db.execute(stmt, {"uid": uid, "interest_id": interest_id})
 
-def _get_all_interest_names(db: Session):
-    stmt = text("""
-        SELECT name FROM public.interests 
-    """)
-    return db.execute(stmt)
-
-# API ENDPOINTS
-22
 """Delete all existing interests for a given user"""
-def _delete_user_interests(uid: str, db: Session):
+def _delete_profile_interests(uid: str, db: Session):
     stmt = text("""
         DELETE FROM public.user_interests
         WHERE uid = :uid
     """)
     db.execute(stmt, {"uid": uid})
 
+# API ENDPOINTS
+@router.get("/")
+def get_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+    _get_profile_interests(uid=uid, db=db)
+
+@router.get("/options")
+def get_all_interest_options(db: Session = Depends(get_db)):
+    return _get_all_interest_options(db=db)
+
 """Take in an array of user interests, and update the public.user_interests to add those. 
 We delete previous interests because the payload will be the list of new interests, not just additional ones
 """
 @router.post("/")
-def update_user_interests(payload: List[InterestsEnum], uid: str = Depends(auth_user), db: Session = Depends(get_db), ):
-     update = _update_user_interests(payload=payload, uid=uid, db=db)
+def update_profile_interests(payload: List[InterestsEnum], uid: str = Depends(auth_user), db: Session = Depends(get_db), ):
+     update = _update_profile_interests(payload=payload, uid=uid, db=db)
      return {"ok": True}
 
 
 """Delete all existing interests for a given user"""
 @router.delete("/")
-def delete_user_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    deleted = _delete_user_interests(uid=uid, db=db)
+def delete_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+    deleted = _delete_profile_interests(uid=uid, db=db)
     return {"ok": True}
