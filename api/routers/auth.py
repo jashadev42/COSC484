@@ -5,7 +5,7 @@ from services.db import get_db
 from services.otp import send_otp, verify_otp
 from fastapi.encoders import jsonable_encoder
 
-from user import _user_exists
+from routers.user import _user_exists
 from services.auth import auth_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])

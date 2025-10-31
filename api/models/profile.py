@@ -7,25 +7,24 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 # Enums
-from enums.genders import GendersEnum
-from enums.interests import InterestsEnum 
-from enums.pronouns import PronounsEnum
-from enums.relationship_goals import RelationshipGoalsEnum
-from enums.personality_type import PersonalityTypeEnum
-from enums.love_language import LoveLanguageEnum
-from enums.attachment_style import AttachmentStyleEnum
-from enums.political_views import PoliticalViewsEnum
-from enums.diet import DietEnum
-from enums.religion import ReligionEnum
-from enums.pets import PetsEnum
-from enums.exercise_frequency import ExerciseFrequencyEnum
-from enums.drink_frequency import DrinkFrequencyEnum
-from enums.smoke_frequency import SmokeFrequencyEnum
-from enums.sleep_schedule import SleepScheduleEnum
-from enums.zodiac_signs import ZodiacSignsEnum 
+from models.enums.genders import GendersEnum
+from models.enums.interests import InterestsEnum 
+from models.enums.pronouns import PronounsEnum
+from models.enums.relationship_goals import RelationshipGoalsEnum
+from models.enums.personality_type import PersonalityTypeEnum
+from models.enums.love_language import LoveLanguageEnum
+from models.enums.attachment_style import AttachmentStyleEnum
+from models.enums.political_views import PoliticalViewsEnum
+from models.enums.diet import DietEnum
+from models.enums.religion import ReligionEnum
+from models.enums.pets import PetsEnum
+from models.enums.exercise_frequency import ExerciseFrequencyEnum
+from models.enums.drink_frequency import DrinkFrequencyEnum
+from models.enums.smoke_frequency import SmokeFrequencyEnum
+from models.enums.sleep_schedule import SleepScheduleEnum
+from models.enums.zodiac_signs import ZodiacSignsEnum 
 
 class UserProfileSchema(BaseModel):
-    uid: UUID
     created_at: Optional[datetime] = None
 
     bio: Optional[str] = Field(default=None, max_length=1000)

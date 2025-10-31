@@ -11,12 +11,17 @@ AND DECODE THEIR JWT AGAINST OUR "SOURCE OF TRUTH" SECRET FROM SUPABASE
 THIS IS USED IN EVERY API ENDPOINT THAT INTERACTS WITH A USER PROFILE WITH THE PARAMS 'def foo(uid: str = Depends(auth_user))'
 """
 
-SECRET = os.environ("SUPABASE_JWT_SECRET")
+from dotenv import load_dotenv, find_dotenv
+load_dotenv() # Load env variables
+
+
+SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 SCHEME = HTTPBearer(auto_error=True)
 
 def auth_user(creds: HTTPAuthorizationCredentials = Depends(SCHEME)) -> str:
     try:
-        payload = jwt.decode(creds.credentials, SECRET, algorithms=["HS256"])
+        payload = jwt.decode(creds.credentials, SECRET, algorithms=["HS256"], audience="authenticated")
+        print(payload)
         sub = payload.get("sub")
         if not sub:
             raise ValueError("Missing sub")

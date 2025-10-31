@@ -24,6 +24,12 @@ def _interests_to_uuid_arr(arr: List[str], db: Session) -> List[str]:
         res.append(uuid)
     return res
 
+def _get_all_interest_names(db: Session):
+    stmt = text("""
+        SELECT name FROM public.interests 
+    """)
+    return db.execute(stmt)
+
 """Take in an array of user interests, and update the public.user_interests to add those. 
 We delete previous interests because the payload will be the list of new interests, not just additional ones
 """
@@ -36,21 +42,19 @@ def update_user_interests(payload: List[InterestsEnum], uid: str = Depends(auth_
     """Session.begin() provides a context manager which both begins and commits a transaction, 
     as well as closes out the Session when complete, rolling back the transaction 
     if any errors occur"""
-    with db.begin() as session:
-        for interest_id in interest_ids:
-            stmt = text("""
-                INSERT INTO public.user_interests (uid, interest_id)
-                VALUES (:uid, :interest_id)
-            """)
-            db.execute(stmt, {"uid": uid, "interest_id": interest_id})
+    for interest_id in interest_ids:
+        stmt = text("""
+            INSERT INTO public.user_interests (uid, interest_id)
+            VALUES (:uid, :interest_id)
+        """)
+        db.execute(stmt, {"uid": uid, "interest_id": interest_id})
 
 
 """Delete all existing interests for a given user"""
 @router.delete("/")
 def delete_user_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    with db.begin() as session:
-        stmt = text("""
-            DELETE FROM public.user_interests
-            WHERE id = :uid
-        """)
-        db.execute(stmt, {"uid": uid})
+    stmt = text("""
+        DELETE FROM public.user_interests
+        WHERE id = :uid
+    """)
+    db.execute(stmt, {"uid": uid})
