@@ -48,8 +48,9 @@ def update_user_interests(payload: List[InterestsEnum], uid: str = Depends(auth_
 """Delete all existing interests for a given user"""
 @router.delete("/")
 def delete_user_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    stmt = text("""
+    with db.begin() as session:
+        stmt = text("""
             DELETE FROM public.user_interests
             WHERE id = :uid
         """)
-    db.execute(stmt, {"uid": uid})
+        db.execute(stmt, {"uid": uid})

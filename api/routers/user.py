@@ -17,7 +17,7 @@ def set_user_info(first_name: str, last_name: str, birthdate: str, uid: str = De
     if not _user_exists(uid, db):
         raise HTTPException(status_code=404, detail=(f"User with id '{uid}' does not exist!"))
 
-    with db.begin():
+    with db.begin() as session:
         # insert if new; if row exists, fill blanks only.
         stmt = text("""
             INSERT INTO public.users (id, first_name, last_name, birthdate, created_at)
