@@ -12,3 +12,7 @@ router = APIRouter(prefix="/gender", tags=["gender"])
 def _gender_name_to_uuid(name: str, db: Session):
     uuid = db.execute(text("SELECT id FROM public.genders WHERE name = :name LIMIT 1"), {"name": name}).scalar()
     return uuid if uuid else None
+
+@router.post("/")
+def goat():
+    pass

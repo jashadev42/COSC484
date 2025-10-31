@@ -20,25 +20,25 @@ def set_user_info(payload: UserInfoSchema, uid: str = Depends(auth_user), db: Se
 
     # insert if new; if row exists, fill blanks only.
     stmt = text("""
-        INSERT INTO public.users (id, first_name, last_name, birthdate, created_at)
-        VALUES (:id, :fn, :ln, :dob, now())
-        ON CONFLICT (id) DO UPDATE
-            SET first_name = EXCLUDED.first_name,
-                last_name  = EXCLUDED.last_name,
-                birthdate  = EXCLUDED.birthdate
-        WHERE public.users.first_name IS NULL
-            AND public.users.last_name  IS NULL
-            AND public.users.birthdate  IS NULL
+        UPDATE public.users AS u
+        SET
+        first_name = COALESCE(NULLIF(u.first_name, ''), :fn),
+        last_name  = COALESCE(NULLIF(u.last_name,  ''), :ln),
+        birthdate  = COALESCE(u.birthdate, :dob)
+        WHERE u.id = :uid
+        AND (
+            u.first_name IS NULL OR u.first_name = '' OR
+            u.last_name  IS NULL OR u.last_name  = '' OR
+            u.birthdate  IS NULL
+        )
         RETURNING first_name, last_name, birthdate
     """)
 
-    row = db.execute(stmt, {"id": uid, "fn": payload.fname, "ln": payload.lname, "dob": payload.birthdate}).mappings().first()
+    db.execute(stmt, {"fn": payload.fname, "ln": payload.lname, "dob": payload.birthdate, "uid": uid}).mappings().first()
 
-    # if already set, the UPDATE won’t run; RETURNING still gives current values
-    if row["first_name"] != payload.fname or row["last_name"] != payload.lname or row["birthdate"] != payload.birthdate:
-        # fields were previously set to something else (or not updated)
-        # you can surface 409 if you want strict “immutable once set”
-        raise HTTPException(409, "User information already set")
+    row = db.execute(text("SELECT * FROM public.users WHERE id = :uid"), {"uid": uid}).mappings().first()
+    print(row)
 
+    # Articulate which fields were changed in the return
     return {"ok": True}
 

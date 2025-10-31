@@ -5,12 +5,17 @@ from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
 from routers.user import _user_exists
+from routers.profile import gender, interest
+
 from models.profile import UserProfileSchema
 
-from routers.gender import _gender_name_to_uuid
-from routers.interest import update_user_interests
+from routers.profile.gender import _gender_name_to_uuid
+from routers.profile.interest import _update_user_interests
 
 router = APIRouter(prefix="/profile", tags=["profile"])
+
+router.include_router(gender.router)
+router.include_router(interest.router)
 
 def _profile_exists(uid: int, db: Session):
     exists = db.execute(text("SELECT 1 FROM public.profiles WHERE id = :uid LIMIT 1"), {"uid": uid}).scalar()
@@ -22,7 +27,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
     payload = jsonable_encoder(payload)
     
     gender_id = _gender_name_to_uuid(payload.gender, db=db)
-    update_user_interests(payload=payload.interests, uid=uid)
+    _update_user_interests(payload=payload.interests, uid=uid, db=db)
 
     # Not finished with this
     stmt = text("""

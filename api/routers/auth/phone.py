@@ -6,9 +6,8 @@ from services.otp import send_otp, verify_otp
 from fastapi.encoders import jsonable_encoder
 
 from routers.user import _user_exists
-from services.auth import auth_user
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/phone", tags=["phone"])
 
 def _check_phone_claimed(phone: str, db: Session) -> bool:
     stmt = text("SELECT id from public.users WHERE phone = :phone LIMIT 1")
@@ -48,13 +47,13 @@ def _register_user_phone(user_data, db: Session):
 
 
 """This sends a "short-code" (6 digits) to the desired phone number. Phone must be in 10 digit format (prefix +1)"""
-@router.get("/phone")
+@router.get("/")
 def send_phone_otp(phone: str):
     res = send_otp(phone=phone) # handles validity already
     return res
 
 """This will return an access token that the frontend will use to provide the backend for CRUD operations"""
-@router.post("/phone")
+@router.post("/")
 def verify_phone_otp(phone: str, code: str, db: Session = Depends(get_db)):
     res = verify_otp(phone=phone, code=code) # handles validity already
     user_data = jsonable_encoder(res).get("user")
