@@ -59,6 +59,6 @@ class UserProfileSchema(BaseModel):
 
     pets: Optional[List[PetsEnum]] = None
 
-    smokes: Optional[SmokeFrequencyEnum] = None
-    drinks: Optional[DrinkFrequencyEnum] = None
+    smoke_frequency: Optional[SmokeFrequencyEnum] = None
+    drink_frequency: Optional[DrinkFrequencyEnum] = None
     sleep_schedule: Optional[SleepScheduleEnum] = None

@@ -45,7 +45,7 @@ def _get_all_interest_names(db: Session):
     return db.execute(stmt)
 
 # API ENDPOINTS
-
+22
 """Delete all existing interests for a given user"""
 def _delete_user_interests(uid: str, db: Session):
     stmt = text("""
@@ -60,11 +60,11 @@ We delete previous interests because the payload will be the list of new interes
 @router.post("/")
 def update_user_interests(payload: List[InterestsEnum], uid: str = Depends(auth_user), db: Session = Depends(get_db), ):
      update = _update_user_interests(payload=payload, uid=uid, db=db)
-     return {"updated": update}
+     return {"ok": True}
 
 
 """Delete all existing interests for a given user"""
 @router.delete("/")
 def delete_user_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     deleted = _delete_user_interests(uid=uid, db=db)
-    return {"deleted": deleted}
+    return {"ok": True}
