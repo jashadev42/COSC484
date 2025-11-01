@@ -1,58 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
-from routers.user import _user_exists
-from models.profile import UserProfileSchema
 from models.enums.interests import InterestsEnum
 
 from typing import List
+from services.helpers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_uuid, _interests_to_uuid_arr, _update_profile_interests
 
 
 router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
-
-# PRIVATE HELPERS
-
-def _interest_name_to_uuid(name: str, db: Session) -> str | HTTPException:
-    uuid = db.execute(text("SELECT id FROM public.interests WHERE name = :name LIMIT 1"), {"name": name}).scalar()
-    return uuid if uuid else HTTPException(status_code=400, detail="User interest was type 'None', that is invalid!")
-
-def _interests_to_uuid_arr(arr: List[str], db: Session) -> List[str]:
-    res: list[str] = []
-    for interest in arr:
-        uuid = _interest_name_to_uuid(name=interest, db=db)
-        res.append(uuid)
-    return res
-
-def _get_all_interest_options(db: Session):
-    all = db.execute(text("SELECT * FROM public.interests")).mappings().all()
-    return all
-
-def _get_profile_interests(uid: str, db: Session):
-    all = db.execute(text("SELECT * FROM public.interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
-    return all
-
-def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Session):
-    payload = jsonable_encoder(payload)
-    interest_ids = _interests_to_uuid_arr(payload, db=db) # List of str
-    _delete_profile_interests(uid=uid, db=db) # Delete existing user interests for said user
-
-    for interest_id in interest_ids:
-        stmt = text("""
-            INSERT INTO public.user_interests (uid, interest_id)
-            VALUES (:uid, :interest_id)
-        """)
-        db.execute(stmt, {"uid": uid, "interest_id": interest_id})
-
-"""Delete all existing interests for a given user"""
-def _delete_profile_interests(uid: str, db: Session):
-    stmt = text("""
-        DELETE FROM public.user_interests
-        WHERE uid = :uid
-    """)
-    db.execute(stmt, {"uid": uid})
 
 # API ENDPOINTS
 @router.get("/")
@@ -68,12 +24,10 @@ We delete previous interests because the payload will be the list of new interes
 """
 @router.post("/")
 def update_profile_interests(payload: List[InterestsEnum], uid: str = Depends(auth_user), db: Session = Depends(get_db), ):
-     update = _update_profile_interests(payload=payload, uid=uid, db=db)
-     return {"ok": True}
+     return _update_profile_interests(payload=payload, uid=uid, db=db)
 
 
 """Delete all existing interests for a given user"""
 @router.delete("/")
 def delete_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    deleted = _delete_profile_interests(uid=uid, db=db)
-    return {"ok": True}
+    return _delete_profile_interests(uid=uid, db=db)

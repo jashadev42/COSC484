@@ -5,11 +5,12 @@ from services.db import get_db
 from services.auth import auth_user
 from models.user import UserInfoSchema
 
-router = APIRouter(prefix="/user", tags=["user"])
+from routers.user import preferences
+from services.helpers.user import _user_exists
 
-def _user_exists(uid: int, db: Session):
-    exists = db.execute(text("SELECT 1 FROM public.users where id = :uid LIMIT 1"), {"uid": uid}).scalar()
-    return True if exists else False
+router = APIRouter(prefix="/user", tags=["User"])
+
+router.include_router(preferences.router)
 
 """Used the first time after a user registers, to set/update their non-changeable info (e.g. birthdate, first name, last name, etc.)"""
 @router.put("/")
@@ -39,6 +40,6 @@ def set_user_info(payload: UserInfoSchema, uid: str = Depends(auth_user), db: Se
     row = db.execute(text("SELECT * FROM public.users WHERE id = :uid"), {"uid": uid}).mappings().first()
     print(row)
 
-    # Articulate which fields were changed in the return
+    # TODO: articulate which fields were changed in the return
     return {"ok": True}
 

@@ -8,3 +8,4 @@ class GendersEnum(str, Enum):
     genderfluid = "genderfluid"
     trans_mtf = "transgender (male to female)"
     trans_ftm = "transgender (female to male)"
+    any = "any"

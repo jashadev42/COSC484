@@ -4,31 +4,31 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
-from routers.user import _user_exists
 from routers.profile import gender, interests
 
 from models.profile import UserProfileSchema
 
 from routers.profile.gender import _gender_name_to_uuid
+from routers.profile.orientation import _orientation_name_to_uuid
 from routers.profile.interests import _update_profile_interests
+
+from services.helpers.profile import _profile_exists
 
 router = APIRouter(prefix="/profile", tags=["Profile"])
 
 router.include_router(gender.router)
 router.include_router(interests.router)
 
-def _profile_exists(uid: int, db: Session):
-    exists = db.execute(text("SELECT 1 FROM public.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).scalar()
-    return True if exists else False
-
 """Used the first time after a user registers, to create their dating profile"""
 @router.post("/")
 def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     payload = jsonable_encoder(payload)
-    if(_profile_exists): return HTTPException(status_code=409, detail=f"Profile for user with uid '{uid}' is already created! Update it to make changes.")
+    if(_profile_exists): 
+        raise HTTPException(status_code=409, detail=f"Profile for user with uid '{uid}' is already created! Use 'PUT' to update it.")
 
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
     gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
+    orientation_id = _orientation_name_to_uuid(name=payload.get("orientation"), db=db)
 
     # Not finished with this
     stmt = text("""
@@ -38,6 +38,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
         drug_use,
         weed_use,
         gender_id,
+        orientation_id,
         location,
         location_label,
         show_precise_location,
@@ -65,6 +66,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
         :drug_use,
         :weed_use,
         :gender_id,
+        :orientation_id,
         :location,
         :location_label,
         :show_precise_location,
@@ -96,6 +98,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
             "drug_use": payload.get("drug_use"),
             "weed_use": payload.get("weed_use"),
             "gender_id": gender_id,
+            "orientation_id": orientation_id,
             "location": payload.get("location"),
             "location_label": payload.get("location_label"),
             "show_precise_location": payload.get("show_precise_location"),
@@ -132,6 +135,7 @@ def update_profile(
     payload = jsonable_encoder(payload)
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
     gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
+    orientation_id = _orientation_name_to_uuid(name=payload.get("orientation"), db=db)
 
     stmt = text("""
         UPDATE public.profiles
@@ -140,6 +144,7 @@ def update_profile(
             drug_use = :drug_use,
             weed_use = :weed_use,
             gender_id = :gender_id,
+            orientation_id = :orientation_id,
             location = :location,
             location_label = :location_label,
             show_precise_location = :show_precise_location,
@@ -172,6 +177,7 @@ def update_profile(
             "drug_use": payload.get("drug_use"),
             "weed_use": payload.get("weed_use"),
             "gender_id": gender_id,
+            "orientation_id": orientation_id,
             "location": payload.get("location"),
             "location_label": payload.get("location_label"),
             "show_precise_location": payload.get("show_precise_location"),
@@ -195,4 +201,4 @@ def update_profile(
         },
     )
 
-    return {"status": "success", "message": f"Profile for user '{uid}' updated."}
+    return {"ok": True, "detail": f"Profile for user '{uid}' updated."}
