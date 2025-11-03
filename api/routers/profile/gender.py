@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from services.db import get_db
 from services.auth import auth_user
 
-from models.enums.genders import GendersEnum
-from services.helpers.gender import _gender_name_to_uuid, _get_all_gender_options, _get_profile_gender, _update_profile_gender
+from models.preferences import GendersEnum
+from helpers.gender import _gender_name_to_uuid, _get_all_gender_options, _get_profile_gender, _update_profile_gender
 
 router = APIRouter(prefix="/gender", tags=["Profile: Gender"])
 

@@ -2,11 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from services.db import get_db
 from services.auth import auth_user
-from models.enums.interests import InterestsEnum
+from models.preferences import InterestsEnum
 
 from typing import List
-from services.helpers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_uuid, _interests_to_uuid_arr, _update_profile_interests
-
+from helpers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_uuid, _interests_to_uuid_arr, _update_profile_interests
 
 router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 

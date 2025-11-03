@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, List
-from uuid import UUID
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class UserInfoSchema(BaseModel):
     fname: str

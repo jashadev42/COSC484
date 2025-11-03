@@ -5,12 +5,9 @@ from services.db import get_db
 from services.auth import auth_user
 from models.user import UserInfoSchema
 
-from routers.user import preferences
-from services.helpers.user import _user_exists
+from helpers.user import _user_exists
 
-router = APIRouter(prefix="/user", tags=["User"])
-
-router.include_router(preferences.router)
+router = APIRouter()
 
 """Used the first time after a user registers, to set/update their non-changeable info (e.g. birthdate, first name, last name, etc.)"""
 @router.put("/")

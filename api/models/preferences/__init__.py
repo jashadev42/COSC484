@@ -1,30 +1,28 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Optional, List
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from models.enums.genders import GendersEnum
-from models.enums.interests import InterestsEnum 
-from models.enums.pronouns import PronounsEnum
-from models.enums.relationship_goals import RelationshipGoalsEnum
-from models.enums.personality_type import PersonalityTypeEnum
-from models.enums.love_language import LoveLanguageEnum
-from models.enums.attachment_style import AttachmentStyleEnum
-from models.enums.political_views import PoliticalViewsEnum
-from models.enums.diet import DietEnum
-from models.enums.religion import ReligionEnum
-from models.enums.pets import PetsEnum
-from models.enums.exercise_frequency import ExerciseFrequencyEnum
-from models.enums.drink_frequency import DrinkFrequencyEnum
-from models.enums.smoke_frequency import SmokeFrequencyEnum
-from models.enums.sleep_schedule import SleepScheduleEnum
-from models.enums.zodiac_signs import ZodiacSignsEnum 
+from .genders import GendersEnum
+from .interests import InterestsEnum 
+from .pronouns import PronounsEnum
+from .relationship_goals import RelationshipGoalsEnum
+from .personality_type import PersonalityTypeEnum
+from .love_language import LoveLanguageEnum
+from .attachment_style import AttachmentStyleEnum
+from .political_views import PoliticalViewsEnum
+from .diet import DietEnum
+from .religion import ReligionEnum
+from .pets import PetsEnum
+from .exercise_frequency import ExerciseFrequencyEnum
+from .drink_frequency import DrinkFrequencyEnum
+from .smoke_frequency import SmokeFrequencyEnum
+from .sleep_schedule import SleepScheduleEnum
+from .zodiac_signs import ZodiacSignsEnum 
 
 # Mirror the settings in public.profiles table
-class ExtraPreferenceOptions(BaseModel):
+class ExtraPreferenceOptionsSchema(BaseModel):
     school: Optional[str] = None
     drug_use: Optional[bool] = None
     weed_use: Optional[bool] = None
@@ -49,5 +47,6 @@ class UserProfilePreferencesSchema(BaseModel):
     age_min: int = 18
     age_max: int = 70
     max_distance: int = 50
-    extra_options: Optional[ExtraPreferenceOptions] = None
+    extra_options: Optional[ExtraPreferenceOptionsSchema] = None
 
+__all__ = ["ExtraPreferenceOptionsSchema", "UserProfilePreferencesSchema"]

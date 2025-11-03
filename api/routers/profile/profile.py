@@ -4,20 +4,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
-from routers.profile import gender, interests
 
 from models.profile import UserProfileSchema
 
-from routers.profile.gender import _gender_name_to_uuid
-from routers.profile.orientation import _orientation_name_to_uuid
-from routers.profile.interests import _update_profile_interests
+from .gender import _gender_name_to_uuid
+from .orientation import _orientation_name_to_uuid
+from .interests import _update_profile_interests
 
-from services.helpers.profile import _profile_exists
+from helpers.profile import _profile_exists
 
-router = APIRouter(prefix="/profile", tags=["Profile"])
-
-router.include_router(gender.router)
-router.include_router(interests.router)
+router = APIRouter()
 
 """Used the first time after a user registers, to create their dating profile"""
 @router.post("/")

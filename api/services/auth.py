@@ -4,6 +4,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 
+from typing import Annotated
+
 """
 THE PURPOSE OF THIS FILE IS TO VERIFY JWT INCOMING FROM THE USER. ALL API CALLS THAT UPDATE / INTERACT
 WITH A USERS PROFILE REQUIRE US TO KNOW THAT THAT USER IS LOGGED IN & AUTHENTICATED. SO, WE NEED TO COMPARE
@@ -16,9 +18,9 @@ load_dotenv() # Load env variables
 
 
 SECRET = os.environ.get("SUPABASE_JWT_SECRET")
-SCHEME = HTTPBearer(auto_error=True)
+SECURITY = HTTPBearer(auto_error=True)
 
-def auth_user(creds: HTTPAuthorizationCredentials = Depends(SCHEME)) -> str:
+def auth_user(creds: Annotated[HTTPAuthorizationCredentials, Depends(SECURITY)]) -> str:
     try:
         payload = jwt.decode(creds.credentials, SECRET, algorithms=["HS256"], audience="authenticated")
         print(payload)

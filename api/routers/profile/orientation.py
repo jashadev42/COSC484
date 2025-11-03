@@ -5,8 +5,8 @@ from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
 
-from models.enums.orientation import SexualOrientationsEnum
-from services.helpers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_uuid, _update_profile_orientation
+from models.preferences.orientation import SexualOrientationsEnum 
+from helpers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_uuid, _update_profile_orientation
 
 router = APIRouter(prefix="/orientation", tags=["Profile: Orientation"])
 

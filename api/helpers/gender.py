@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi import HTTPException
 
-from services.helpers.profile import _profile_exists
+from helpers.profile import _profile_exists
 
 def _gender_name_to_uuid(name: str, db: Session):
     uuid = db.execute(text("SELECT id FROM public.genders WHERE name = :name LIMIT 1"), {"name": name}).scalar()

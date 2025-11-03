@@ -5,7 +5,7 @@ from sqlalchemy import text
 from services.auth import auth_user
 from services.db import get_db
 
-from services.helpers.preferences import _update_user_prefs, _create_user_prefs
+from helpers.preferences import _update_user_prefs, _create_user_prefs
 from models.preferences import UserProfilePreferencesSchema
 
 router = APIRouter(prefix="/preferences", tags=["User: Preferences"])

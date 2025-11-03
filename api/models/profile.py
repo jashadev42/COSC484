@@ -7,22 +7,22 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 # Enums
-from models.enums.genders import GendersEnum
-from models.enums.interests import InterestsEnum 
-from models.enums.pronouns import PronounsEnum
-from models.enums.relationship_goals import RelationshipGoalsEnum
-from models.enums.personality_type import PersonalityTypeEnum
-from models.enums.love_language import LoveLanguageEnum
-from models.enums.attachment_style import AttachmentStyleEnum
-from models.enums.political_views import PoliticalViewsEnum
-from models.enums.diet import DietEnum
-from models.enums.religion import ReligionEnum
-from models.enums.pets import PetsEnum
-from models.enums.exercise_frequency import ExerciseFrequencyEnum
-from models.enums.drink_frequency import DrinkFrequencyEnum
-from models.enums.smoke_frequency import SmokeFrequencyEnum
-from models.enums.sleep_schedule import SleepScheduleEnum
-from models.enums.zodiac_signs import ZodiacSignsEnum 
+from .preferences.genders import GendersEnum
+from .preferences.interests import InterestsEnum 
+from .preferences.pronouns import PronounsEnum
+from .preferences.relationship_goals import RelationshipGoalsEnum
+from .preferences.personality_type import PersonalityTypeEnum
+from .preferences.love_language import LoveLanguageEnum
+from .preferences.attachment_style import AttachmentStyleEnum
+from .preferences.political_views import PoliticalViewsEnum
+from .preferences.diet import DietEnum
+from .preferences.religion import ReligionEnum
+from .preferences.pets import PetsEnum
+from .preferences.exercise_frequency import ExerciseFrequencyEnum
+from .preferences.drink_frequency import DrinkFrequencyEnum
+from .preferences.smoke_frequency import SmokeFrequencyEnum
+from .preferences.sleep_schedule import SleepScheduleEnum
+from .preferences.zodiac_signs import ZodiacSignsEnum 
 
 class UserProfileSchema(BaseModel):
     created_at: Optional[datetime] = None
@@ -33,6 +33,7 @@ class UserProfileSchema(BaseModel):
 
     # These two will need to be converted to their fk UUID by the backend
     gender: Optional[GendersEnum] = None
+    orientation: Optional[GendersEnum] = None
     interests: List[InterestsEnum] = None
     # # # (e.g. SELECT id FROM public.genders WHERE name = :gender) # # #
 

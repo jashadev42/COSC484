@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
-from models.enums.interests import InterestsEnum
-from services.helpers.profile import _profile_exists
+from models.preferences import InterestsEnum
+from helpers.profile import _profile_exists
 
 from typing import List
 
