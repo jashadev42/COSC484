@@ -1,9 +1,14 @@
 from pydantic import BaseModel
 from models.moderation_status import ModerationStatusEnum 
+from uuid import UUID
+from typing import Optional
 
 class PhotoMetaSchema(BaseModel):
-    slot: int
+    id: UUID
+    slot: Optional[int]
     url: str
     is_primary: bool
-    moderation_status: ModerationStatusEnum
+    size_bytes: int
+    mime_type: str
+    moderation_status: ModerationStatusEnum = ModerationStatusEnum.pending
 

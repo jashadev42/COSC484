@@ -1,5 +1,4 @@
-import os
-from supabase import create_client, Client
+from .supabase_client import supabase_for_service as supabase
 import re
 
 """
@@ -9,10 +8,6 @@ THIS IS PROVIDER AGNOSTIC, BUT JUST FOR CLARITY WE ARE USING 'TWILIO AUTH'
 THE MAIN PURPOSE OF THIS FILE IS TO BE OF SERVICE TO THE 'routers.auth' API ENDPOINTS AND 
 OTP (ONE TIME PASSWORD) ACTS AS OUR ONLY METHOD OF VERIFICATION FOR USERS CURRENTLY.
 """
-
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
 
 E164 = re.compile(r"^\+[1-9]\d{7,14}$")  # strict E.164
 

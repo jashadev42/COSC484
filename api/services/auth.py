@@ -33,4 +33,15 @@ def auth_user(creds: Annotated[HTTPAuthorizationCredentials, Depends(SECURITY)])
         print("User failed to authenticate!")
         raise HTTPException(status_code=401, detail="Invalid or expired authorization token")
 
-
+def get_user_jwt(creds: Annotated[HTTPAuthorizationCredentials, Depends(SECURITY)]) -> str:
+    try:
+        jwt.decode(
+            creds.credentials,
+            SECRET,
+            algorithms=["HS256"],
+            audience="authenticated",
+        )
+        return creds.credentials
+    except (JWTError, ValueError):
+        print("User failed to authenticate!")
+        raise HTTPException(status_code=401, detail="Invalid or expired authorization token")
