@@ -3,11 +3,11 @@ from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
 from sqlalchemy.orm import Session
 from services.auth import auth_user, get_user_jwt
 from services.db import get_db
-from services.storage import upload_profile_photo, get_user_photos
+from services.storage import upload_profile_photo, get_user_photos, delete_profile_photo
 
 from services.supabase_client import storage_for_user
 
-from models.photos import PhotoMetaSchema
+from models.photos import PhotoMetaSchema, PhotoSchema
 from typing import Annotated, List
 
 
@@ -57,6 +57,18 @@ async def add_profile_photo(photo: UploadFile, user_jwt: Annotated[str, Depends(
 def set_profile_photo(slot: int, photo: UploadFile, uid: Annotated[str, Depends(auth_user)], db: Annotated[Session, Depends(get_db)]):
     pass
 
-@router.delete("/{slot}")
-def delete_profile_photo(slot: int, uid: Annotated[str, Depends(auth_user)], db: Annotated[Session, Depends(get_db)]):
-    pass
+@router.delete("/")
+async def del_profile_photo(photo: PhotoSchema, user_jwt: Annotated[str, Depends(get_user_jwt)], uid: Annotated[str, Depends(auth_user)], db: Annotated[Session, Depends(get_db)]):
+    storage = storage_for_user(user_jwt=user_jwt)
+    result = await asyncio.to_thread(
+        delete_profile_photo,
+        photo=photo,
+        uid=uid,
+        db=db,
+        storage=storage
+    )
+
+    return {
+        "message": "Photo deleted successfully",
+        "photo": result,
+    }

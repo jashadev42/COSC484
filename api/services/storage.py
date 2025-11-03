@@ -5,7 +5,7 @@ from sqlalchemy import text
 from storage3 import SyncStorageClient
 from fastapi import HTTPException
 
-from models.photos import PhotoMetaSchema
+from models.photos import PhotoMetaSchema, PhotoSchema
 
 import mimetypes
 import uuid
@@ -29,6 +29,8 @@ def get_user_photos(storage: SyncStorageClient, uid: str, db: Session, ttl_secon
     """)
 
     rows = db.execute(stmt, {"uid": uid}).mappings().all()
+    if not rows:
+        return []
 
     bucket = storage.from_(BUCKET)
     paths = [r["path"] for r in rows]
@@ -55,7 +57,8 @@ def get_user_photos(storage: SyncStorageClient, uid: str, db: Session, ttl_secon
             is_primary = row["is_primary"],
             mime_type = row.get("mime_type"),
             size_bytes = row.get("size_bytes"),
-            url = url_map.get(row["path"]) 
+            url = url_map.get(row["path"]),
+            path = row["path"]
         ) for row in rows
     ]
 
@@ -99,6 +102,26 @@ def upload_profile_photo(
         is_primary = row["is_primary"],
         mime_type = row.get("mime_type"),
         size_bytes = row.get("size_bytes"),
+        path = path,
         url = signed.get("signedUrl") or signed.get("signedURL")
     )
+    
+def delete_profile_photo(photo: PhotoSchema, uid: str, storage: SyncStorageClient, db: Session):
+    if len(get_user_photos(storage=storage, uid=uid, db=db)) == 0:
+        raise HTTPException(status_code=400, detail=f"The user with uid '{uid}' has no photos uploaded!")
+
+    stmt = text("""
+        DELETE FROM public.profile_photos WHERE id = :id AND uid = :uid;
+    """)
+
+    row = db.execute(stmt, {"id": photo.id, "uid": uid})
+
+    bucket = storage.from_(BUCKET)
+
+    res = bucket.remove([photo.path])
+    return res
+
+
+
+
     
