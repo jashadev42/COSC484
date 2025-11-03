@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from fastapi import UploadFile
 from models.moderation_status import ModerationStatusEnum 
 from uuid import UUID
 from typing import Optional
@@ -14,5 +15,5 @@ class PhotoMetaSchema(BaseModel):
     moderation_status: ModerationStatusEnum = ModerationStatusEnum.pending
 
 class PhotoSchema(BaseModel):
-    id: str
+    id: UUID
     path: str
