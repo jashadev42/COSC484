@@ -1,20 +1,25 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
 
-from models.profile import UserProfileSchema
-
-from .gender import _gender_name_to_id
-from .orientation import _orientation_name_to_id
-from .interests import _update_profile_interests
-
-from helpers.profile import _profile_exists
+from typing import Annotated
 
 router = APIRouter()
 
 @router.get("/{target_uid}")
-def get_my_profile(caller_uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    pass
+def get_user_profile(
+    target_uid: str,
+    caller_uid: Annotated[str, Depends(auth_user)],
+    db: Annotated[Session, Depends(get_db)]
+):
+    stmt = text("""
+        SELECT * FROM public.profiles WHERE uid = :tuid LIMIT 1
+    """)
+    profile = db.execute(stmt, {'tuid': target_uid}).mappings().first()
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    return profile
