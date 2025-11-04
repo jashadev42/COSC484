@@ -22,15 +22,4 @@ def get_user_profile_orientation(
     caller_uid: Annotated[str, Depends(auth_user)],
     db: Annotated[Session, Depends(get_db)]
 ):
-    if not _profile_exists(target_uid, db=db):
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    stmt = text("""
-        SELECT orientation_id FROM public.profiles WHERE uid = :tuid LIMIT 1
-    """)
-    orientation_id = db.execute(stmt, {'tuid': target_uid}).scalar_one_or_none()
-    
-    if not orientation_id:
-        raise HTTPException(status_code=400, detail=f"Target user does not have an orientation set!")
-    
-    return orientation_id
+   return _get_profile_orientation(uid=target_uid, db=db)

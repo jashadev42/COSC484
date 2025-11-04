@@ -7,26 +7,30 @@ from services.db import get_db
 from models.photos import PhotoMetaSchema
 from typing import Annotated, List
 
+import asyncio
 from helpers.profile import _profile_exists
-
+from services.supabase_client import supabase_for_service
+from services.storage import get_user_photos
 
 router = APIRouter(tags=["Profile: Photos"])
 
 @router.get("/{target_uid}/photos", response_model=List[PhotoMetaSchema])
-def get_user_profile_photos(
+async def get_user_profile_photos(
     target_uid: str,
     caller_uid: Annotated[str, Depends(auth_user)],
     db: Annotated[Session, Depends(get_db)]
 ):
     if not _profile_exists(target_uid, db=db):
         raise HTTPException(status_code=404, detail="Profile not found")
+    # TODO: enforce blocks/visibility before fetching
 
-    stmt = text("""
-        SELECT * FROM public.profile_photos WHERE uid = :tuid
-    """)
-    photos = db.execute(stmt, {'tuid': target_uid}).mappings().all()
-    
-    if not photos:
-        return []
-    
-    return photos
+    storage = supabase_for_service.storage
+    result = await asyncio.to_thread(
+        get_user_photos,
+        storage=storage,
+        uid=target_uid,
+        db=db,
+        ttl_seconds=500,
+        only_approved=True, 
+    )
+    return result

@@ -1,5 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+
+from models.user import UserInfoSchema
 
 def _user_exists(uid: str, db: Session) -> bool:
     return bool(
@@ -17,3 +21,62 @@ def _create_user(uid: str, phone: str, db: Session):
     
     user = db.execute(stmt, {"id": uid, "phone": phone})
     return user
+
+def _get_user_by_id(uid: str, db: Session):
+    """Private helper to fetch user by ID"""
+    stmt = text("""
+        SELECT * FROM public.users WHERE id = :uid LIMIT 1
+    """)
+    return db.execute(stmt, {"uid": uid}).mappings().first()
+
+
+def _toggle_user_pause(uid: str, db: Session):
+    """Private helper to toggle user's paused status"""
+    if not _user_exists(uid=uid, db=db):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    stmt = text("""
+        UPDATE public.users 
+        SET paused = NOT paused
+        WHERE id = :uid
+        RETURNING *
+    """)
+    return db.execute(stmt, {"uid": uid}).mappings().first()
+
+
+def _update_user_info(payload: UserInfoSchema, uid: str, db: Session):
+    """Private helper to update user's non-changeable info (first use only)"""
+    if not _user_exists(uid=uid, db=db):
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    payload = jsonable_encoder(payload)
+    stmt = text("""
+        UPDATE public.users AS u
+        SET
+        first_name = COALESCE(NULLIF(u.first_name, ''), :fn),
+        last_name  = COALESCE(NULLIF(u.last_name,  ''), :ln),
+        birthdate  = COALESCE(u.birthdate, :dob)
+        WHERE u.id = :uid
+        AND (
+            u.first_name IS NULL OR u.first_name = '' OR
+            u.last_name  IS NULL OR u.last_name  = '' OR
+            u.birthdate  IS NULL
+        )
+        RETURNING first_name, last_name, birthdate
+    """)
+    
+    db.execute(stmt, {"fn": payload.get("fname"), "ln": payload.get("lname"), "dob": payload.get("dob"), "uid": uid})
+    return _get_user_by_id(uid, db)
+
+def _soft_delete_user(uid: str, db: Session):
+    """Private helper to soft delete user by setting deleted_at timestamp"""
+    if not _user_exists(uid=uid, db=db):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    stmt = text("""
+        UPDATE public.users 
+        SET deleted_at = now()
+        WHERE id = :uid
+        RETURNING *
+    """)
+    return db.execute(stmt, {"uid": uid}).mappings().first()

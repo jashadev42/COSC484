@@ -17,13 +17,17 @@ router = APIRouter()
 
 @router.get("/")
 def get_my_profile(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    pass
+    stmt = text("""
+        SELECT * FROM public.profiles WHERE uid = :uid LIMIT 1
+    """)
+    profile = db.execute(stmt, {"uid": uid}).mappings().first()
+    return profile
 
 """Used the first time after a user registers, to create their dating profile"""
 @router.post("/")
 def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     payload = jsonable_encoder(payload)
-    if(_profile_exists): 
+    if _profile_exists(uid=uid, db=db): 
         raise HTTPException(status_code=409, detail=f"Profile for user with uid '{uid}' is already created! Use 'PUT' to update it.")
 
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
@@ -129,8 +133,10 @@ def update_profile(
     uid: str = Depends(auth_user),
     db: Session = Depends(get_db),
 ):
+    # Create profile for them automatically
     if not _profile_exists(uid=uid, db=db):
-        raise HTTPException(status_code=404, detail=f"User with id '{uid}' does not exist!")
+        return create_profile(payload=payload, uid=uid, db=db)
+        # raise HTTPException(status_code=404, detail=f"User with id '{uid}' does not exist!")
 
     payload = jsonable_encoder(payload)
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)

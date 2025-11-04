@@ -22,15 +22,4 @@ def get_user_profile_gender(
     caller_uid: Annotated[str, Depends(auth_user)],
     db: Annotated[Session, Depends(get_db)]
 ):
-    if not _profile_exists(target_uid, db=db):
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    stmt = text("""
-        SELECT gender_id FROM public.profiles WHERE uid = :tuid
-    """)
-    gender_id = db.execute(stmt, {'tuid': target_uid}).scalar_one_or_none()
-    
-    if not gender_id:
-        raise HTTPException(status_code=400, detail=f"Target user does not have a gender set!")
-    
-    return gender_id
+    return _get_profile_gender(uid=target_uid, db=db)

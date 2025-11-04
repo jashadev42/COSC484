@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from models.preferences import InterestsEnum
 from helpers.profile import _profile_exists
+from helpers.user import _user_exists
 
 from typing import List
 
@@ -35,9 +36,9 @@ def _get_all_interest_options(db: Session):
 
 def _get_profile_interests(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
-        raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
+        raise HTTPException(status_code=404, detail=f"Profile with id '{uid}' does not exist!")
 
-    rows = db.execute(text("SELECT interest_id FROM public.user_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
+    rows = db.execute(text("SELECT interest_id FROM public.profile_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
 
     return [
         {
@@ -47,8 +48,8 @@ def _get_profile_interests(uid: str, db: Session):
     ]
 
 def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Session):
-    if not _profile_exists(uid=uid, db=db):
-        raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
+    if not _user_exists(uid=uid, db=db):
+        raise HTTPException(status_code=404, detail=f"User with id '{uid}' does not exist!")
     
     payload = jsonable_encoder(payload)
     interest_ids = _interests_to_id_arr(payload, db=db) # List of str
@@ -56,7 +57,7 @@ def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Sessio
 
     for interest_id in interest_ids:
         stmt = text("""
-            INSERT INTO public.user_interests (uid, interest_id)
+            INSERT INTO public.profile_interests (uid, interest_id)
             VALUES (:uid, :interest_id)
         """)
         db.execute(stmt, {"uid": uid, "interest_id": interest_id})
@@ -65,7 +66,7 @@ def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Sessio
 """Delete all existing interests for a given user"""
 def _delete_profile_interests(uid: str, db: Session):
     stmt = text("""
-        DELETE FROM public.user_interests
+        DELETE FROM public.profile_interests
         WHERE uid = :uid
     """)
     db.execute(stmt, {"uid": uid})

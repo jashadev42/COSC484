@@ -28,8 +28,8 @@ private_router.include_router(private_user_router)
 private_router.include_router(private_profile_router)
 
 app = FastAPI(title="Main API", lifespan=lifespan)
+app.include_router(private_router) # private needs to be mounted before public
 app.include_router(public_router)
-app.include_router(private_router)
 
 # Mount static files (e.g. images, JS, CSS)
 app.mount("/static", StaticFiles(directory="static"), name="static")

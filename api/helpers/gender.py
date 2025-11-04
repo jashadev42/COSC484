@@ -25,7 +25,7 @@ def _get_all_gender_options(db: Session):
 
 def _get_profile_gender(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
-        raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
+        raise HTTPException(status_code=404, detail=f"Profile with id '{uid}' does not exist!")
     
     gender_id = db.execute(text("SELECT gender_id FROM public.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).scalar()
     return {
@@ -36,7 +36,7 @@ def _get_profile_gender(uid: str, db: Session):
 
 def _update_profile_gender(gender_id: str, uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
-        raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
+        raise HTTPException(status_code=404, detail=f"Profile with id '{uid}' does not exist!")
 
     stmt = text("""
         UPDATE public.profiles

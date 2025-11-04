@@ -28,21 +28,36 @@ def _photo_exists(uid: str, id: str, db: Session):
     row = db.execute(stmt, {"id": id, "uid": uid})
     return bool(row)
 
-def get_user_photos(storage: SyncStorageClient, uid: str, db: Session, ttl_seconds: int = 500):
-    stmt = text("""
-        SELECT * FROM public.profile_photos
-        file_photos WHERE uid = :uid
+def get_user_photos(
+    storage: SyncStorageClient,
+    uid: str,
+    db: Session,
+    ttl_seconds: int = 500,
+    only_approved: bool = False,
+):
+    # Build WHERE clause
+    where = ["uid = :uid"]
+    params = {"uid": uid}
+    if only_approved:
+        where.append("moderation_status = 'approved'")
+
+    stmt = text(f"""
+        SELECT id, uid, path, mime_type, size_bytes, slot, is_primary, moderation_status, created_at
+        FROM public.profile_photos
+        WHERE {' AND '.join(where)}
         ORDER BY is_primary DESC, created_at DESC
     """)
-
     rows = db.execute(stmt, {"uid": uid}).mappings().all()
+    print(rows)
     if not rows:
         return []
 
     bucket = storage.from_(BUCKET)
     paths = [r["path"] for r in rows]
+    print(paths)
 
     signed_resp = bucket.create_signed_urls(paths, ttl_seconds)
+    print("SRSP:" , signed_resp)
 
     if isinstance(signed_resp, dict):
         data = signed_resp.get("data") or []

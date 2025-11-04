@@ -14,7 +14,7 @@ router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 def get_my_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_profile_interests(uid=uid, db=db)
 
-"""Take in an array of user interests, and update the public.user_interests to add those. 
+"""Take in an array of user interests, and update the public.profile_interests to add those. 
 We delete previous interests because the payload will be the list of new interests, not just additional ones
 """
 @router.post("")

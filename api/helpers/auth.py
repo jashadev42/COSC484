@@ -17,12 +17,8 @@ def _register_user_phone(user_data: object, db: Session):
     user_data = jsonable_encoder(user_data) # Ensure json is decoded
 
     uid: str = user_data.get("id")
-    print(uid)
     # Check whether or not user already exists
     exists = _user_exists(uid=uid, db=db)
-    if not exists:
-        raise HTTPException(status_code=409, detail=f"User with uid '{uid}' does not exist!")
-    
     provider: str = user_data.get("app_metadata").get("provider") # enum {phone, email}
 
     if provider == "phone":
@@ -30,12 +26,13 @@ def _register_user_phone(user_data: object, db: Session):
         # If phone is present, ensure it is not taken
         if phone:
             phone_claimed_by = _check_phone_claimed_by(phone=phone, db=db)
-            print(phone_claimed_by == str(uid))
-            if not phone_claimed_by == uid: # If the user is incorrect
+            if not phone_claimed_by == uid and exists: # If the user is incorrect
                 raise HTTPException(status_code=409, detail=f"Phone number {phone} is already registered to another account")
-            elif phone_claimed_by == uid:
+            elif phone_claimed_by == uid and exists:
                 return {"ok": True}
 
         # Add new user
-        return _create_user(uid=uid, phone=phone, db=db)
+        if not exists and not phone_claimed_by:
+            return _create_user(uid=uid, phone=phone, db=db)
+        
     return {"ok": False, "detail": "User not created. Must use phone provider."}

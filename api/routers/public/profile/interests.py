@@ -11,6 +11,7 @@ from typing import Annotated
 from helpers.profile import _profile_exists
 
 
+
 router = APIRouter(tags=["Profile: Interests"])
 
 # API ENDPOINTS
@@ -24,15 +25,4 @@ def get_user_profile_interests(
     caller_uid: Annotated[str, Depends(auth_user)],
     db: Annotated[Session, Depends(get_db)]
 ):
-    if not _profile_exists(target_uid, db=db):
-        raise HTTPException(status_code=404, detail="Profile not found")
-
-    stmt = text("""
-        SELECT * FROM public.user_interactions WHERE uid = :tuid
-    """)
-    interests = db.execute(stmt, {'tuid': target_uid}).mappings().all()
-    
-    if not interests:
-        return []
-    
-    return interests
+    return _get_profile_interests(uid=target_uid, db=db)
