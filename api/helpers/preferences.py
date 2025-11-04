@@ -16,6 +16,12 @@ def _user_prefs_exist(uid: str, db: Session):
     stmt = text("""SELECT 1 FROM public.user_preferences WHERE uid = :uid LIMIT 1""")
     return bool(db.execute(stmt, {"uid": uid}).scalar())
 
+def _get_user_prefs(uid: str, db: Session):
+    stmt = text("""SELECT * FROM public.user_preferences WHERE uid = :uid LIMIT 1""")
+    prefs = db.execute(stmt, {"uid": uid}).mappings().one()
+    return prefs or None
+
+
 def _create_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Session):
     if _user_prefs_exist(uid=uid, db=db):
         raise HTTPException(status_code=409, detail=f"User with id '{uid}' already has preferences! Use 'PUT' to update them!")
