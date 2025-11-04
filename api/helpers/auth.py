@@ -5,6 +5,8 @@ from helpers.user import _user_exists
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
+from helpers.user import _create_user
+
 def _check_phone_claimed_by(phone: str, db: Session):
     stmt = text("SELECT id from public.users WHERE phone = :phone LIMIT 1")
     claimed_by = db.execute(stmt, {"phone": phone}).scalar()
@@ -22,14 +24,12 @@ def _register_user_phone(user_data: object, db: Session):
         raise HTTPException(status_code=409, detail=f"User with uid '{uid}' does not exist!")
     
     provider: str = user_data.get("app_metadata").get("provider") # enum {phone, email}
-    created_at: str = user_data.get("created_at") # timestamptz
 
     if provider == "phone":
         phone: str = user_data.get("phone") 
         # If phone is present, ensure it is not taken
         if phone:
             phone_claimed_by = _check_phone_claimed_by(phone=phone, db=db)
-            print("PCB:", phone_claimed_by)
             print(phone_claimed_by == str(uid))
             if not phone_claimed_by == uid: # If the user is incorrect
                 raise HTTPException(status_code=409, detail=f"Phone number {phone} is already registered to another account")
@@ -37,13 +37,5 @@ def _register_user_phone(user_data: object, db: Session):
                 return {"ok": True}
 
         # Add new user
-        db.execute(
-            text("""
-                insert into public.users (id, phone, created_at)
-                values (:id, :phone, now())
-            """),
-            {"id": uid, "phone": phone},
-        )
-
-        print(uid, provider, created_at, phone)
-    return {"ok": True}
+        return _create_user(uid=uid, phone=phone, db=db)
+    return {"ok": False, "detail": "User not created. Must use phone provider."}
