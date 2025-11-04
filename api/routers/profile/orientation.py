@@ -18,7 +18,6 @@ def get_all_orientation_options(db: Session = Depends(get_db)):
 def get_profile_orientation(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_profile_orientation(uid=uid, db=db)
     
-
 @router.put("/")
 def update_profile_orientation(gender: SexualOrientationsEnum, uid = Depends(auth_user), db: Session = Depends(get_db)):
     gid = _orientation_name_to_uuid(name=gender, db=db)

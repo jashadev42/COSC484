@@ -8,6 +8,10 @@ def _orientation_name_to_uuid(name: str, db: Session):
     uuid = db.execute(text("SELECT id FROM public.orientations WHERE name = :name LIMIT 1"), {"name": name}).scalar()
     return uuid if uuid else None
 
+def _orientation_id_to_name(id: str, db: Session):
+    name = db.execute(text("SELECT name FROM public.orientations WHERE id = :id LIMIT 1"), {"id": id}).scalar()
+    return name if name else None
+
 def _get_all_orientation_options(db: Session):
     res = db.execute(text("SELECT * FROM public.orientations")).mappings().all()
     return res
@@ -16,8 +20,12 @@ def _get_profile_orientation(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
         raise HTTPException(status=404, detail=f"Profile with uid '{uid}' does not exist!")
    
-    res = db.execute(text("SELECT * FROM public.orientations WHERE uid = :uid"), {"uid": uid}).mappings().all()
-    return res
+    x = db.execute(text("SELECT * FROM public.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).mappings().one()
+    orientation_id = x.get("orientation_id")
+    return {
+        "name": _orientation_id_to_name(id=orientation_id, db=db),
+        "id": orientation_id
+    }
 
 def _update_profile_orientation(orientation_id: str, uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
