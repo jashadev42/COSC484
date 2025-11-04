@@ -3,11 +3,11 @@ from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from services.auth import auth_user, get_user_jwt
 from services.db import get_db
-from services.storage import upload_profile_photo, get_user_photos, delete_profile_photo, update_profile_photo
+from services.storage import upload_profile_photo, get_user_photos, delete_profile_photo, update_profile_photo, update_profile_photo_metadata
 
 from services.supabase_client import storage_for_user
 
-from models.photos import PhotoMetaSchema, PhotoSchema
+from models.photos import PhotoMetaSchema, PhotoSchema, UpdatePhotoMetaSchema
 from typing import Annotated, List
 
 
@@ -39,7 +39,6 @@ async def add_profile_photo(photo: UploadFile, user_jwt: Annotated[str, Depends(
         uid=uid,
         file_bytes=photo_bytes,
         mime_type=photo.content_type,
-        is_primary=False,
         db=db,
         storage=storage
     )
@@ -83,6 +82,29 @@ async def set_profile_photo(
     
     return {
         "message": "Photo updated successfully",
+        "photo": result,
+    }
+
+@router.put("/meta")
+async def set_profile_photo_metadata(
+    data: UpdatePhotoMetaSchema,
+    user_jwt: Annotated[str, Depends(get_user_jwt)],
+    uid: Annotated[str, Depends(auth_user)],
+    db: Annotated[Session, Depends(get_db)]
+):
+    storage = storage_for_user(user_jwt=user_jwt)
+    
+    result = await asyncio.to_thread(
+        update_profile_photo_metadata,
+        photo=data.photo,
+        metadata=data.metadata,
+        uid=uid,
+        db=db,
+        storage=storage
+    )
+    
+    return {
+        "message": "Photo metadata updated successfully",
         "photo": result,
     }
 

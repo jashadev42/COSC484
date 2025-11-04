@@ -5,7 +5,7 @@ from sqlalchemy import text
 from storage3 import SyncStorageClient
 from fastapi import HTTPException
 
-from models.photos import PhotoMetaSchema, PhotoSchema
+from models.photos import PhotoMetaSchema, PhotoSchema, PhotoMetadataSchema
 
 import mimetypes
 import uuid
@@ -60,12 +60,15 @@ def get_user_photos(storage: SyncStorageClient, uid: str, db: Session, ttl_secon
     return [
         PhotoMetaSchema(
             id = row["id"],
-            slot = row.get("slot"),
-            is_primary = row["is_primary"],
             mime_type = row.get("mime_type"),
             size_bytes = row.get("size_bytes"),
             url = url_map.get(row["path"]),
-            path = row["path"]
+            path = row["path"],
+            metadata=PhotoMetadataSchema(
+                slot = row.get("slot"),
+                is_primary = row["is_primary"],
+                moderation_status = row["moderation_status"],
+            )
         ) for row in rows
     ]
 
@@ -76,7 +79,6 @@ def upload_profile_photo(
     mime_type: str,
     db: Session,
     slot: Optional[int] = None,
-    is_primary: bool = False
 ) -> Dict[str, Any]:
     photo_id = uuid.uuid4()
     path = f"{BASE_PREFIX}/{uid}/photos/{photo_id}{_mime_to_ext(mime_type)}"
@@ -89,12 +91,12 @@ def upload_profile_photo(
 
     stmt = text("""
         INSERT INTO public.profile_photos 
-            (id, uid, bucket, path, mime_type, size_bytes, is_primary, slot)
+            (id, uid, bucket, path, mime_type, size_bytes, slot)
         VALUES
-            (:photo_id, :uid, :bucket, :path, :mime_type, :size_bytes, :is_primary, :slot)
+            (:photo_id, :uid, :bucket, :path, :mime_type, :size_bytes, :slot)
         RETURNING *
     """)
-    row = db.execute(stmt, {"photo_id": photo_id, "uid": uid, "bucket": BUCKET, "path": path, "mime_type": mime_type, "size_bytes": len(file_bytes), "is_primary": is_primary, "slot": slot}).mappings().one()
+    row = db.execute(stmt, {"photo_id": photo_id, "uid": uid, "bucket": BUCKET, "path": path, "mime_type": mime_type, "size_bytes": len(file_bytes), "slot": slot}).mappings().one()
 
     bucket.upload(
         path=path,
@@ -105,12 +107,15 @@ def upload_profile_photo(
 
     return PhotoMetaSchema (
         id = row["id"],
-        slot = row.get("slot"),
-        is_primary = row["is_primary"],
         mime_type = row.get("mime_type"),
         size_bytes = row.get("size_bytes"),
         path = path,
-        url = signed.get("signedUrl") or signed.get("signedURL")
+        url = signed.get("signedUrl") or signed.get("signedURL"),
+        metadata=PhotoMetadataSchema(
+            slot = row.get("slot"),
+            is_primary = row["is_primary"],
+            moderation_status = row["moderation_status"],
+        )
     )
     
 def delete_profile_photo(photo: PhotoSchema, uid: str, storage: SyncStorageClient, db: Session):
@@ -162,10 +167,52 @@ def update_profile_photo(photo: PhotoSchema, mime_type: str, file_bytes: bytes, 
 
     return PhotoMetaSchema(
         id = row["id"],
-        slot = row.get("slot"),
-        is_primary = row["is_primary"],
         mime_type = row.get("mime_type"),
         size_bytes = row.get("size_bytes"),
         path = row["path"],
-        url = signed.get("signedUrl") or signed.get("signedURL")
+        url = signed.get("signedUrl") or signed.get("signedURL"),
+        metadata=PhotoMetadataSchema(
+            slot = row.get("slot"),
+            is_primary = row["is_primary"],
+            moderation_status = row["moderation_status"],
+
+        )
+    )
+
+
+def update_profile_photo_metadata(photo: PhotoSchema, metadata: PhotoMetadataSchema, storage: SyncStorageClient, uid: str, db: Session) -> PhotoMetaSchema:
+    if not _photo_exists(uid=uid, id=photo.id, db=db):
+        raise HTTPException(status_code=404, detail=f"The photo with id '{photo.id}' does not exist!")
+    
+    stmt = text("""
+        UPDATE public.profile_photos
+        SET
+            updated_at = now(),
+            slot = COALESCE(:slot, slot),
+            moderation_status = COALESCE(:moderation_status, moderation_status),
+            is_primary = COALESCE(:is_primary, is_primary)
+        WHERE id = :id AND uid = :uid
+        RETURNING *
+    """)
+
+    row = db.execute(stmt, {"slot": metadata.slot, "moderation_status": metadata.moderation_status.value or None, "is_primary": metadata.is_primary, "id": str(photo.id), "uid": uid}).mappings().one_or_none()
+    if not row:
+        raise HTTPException(status_code=404, detail=f"The photo with id '{photo.id}' does not exist!")
+
+    bucket = storage.from_(BUCKET)
+
+    signed = bucket.create_signed_url(photo.path, 300) or {}
+    url = signed.get("signedUrl") or signed.get("signedURL")
+
+    return PhotoMetaSchema(
+        id = row["id"],
+        mime_type = row.get("mime_type"),
+        size_bytes = row.get("size_bytes"),
+        path = row["path"],
+        url = signed.get("signedUrl") or signed.get("signedURL"),
+        metadata=PhotoMetadataSchema(
+            slot = row.get("slot"),
+            is_primary = row["is_primary"],
+            moderation_status = row["moderation_status"],
+        )
     )
