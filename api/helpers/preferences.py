@@ -5,7 +5,7 @@ from fastapi import HTTPException
 
 from models.preferences import UserProfilePreferencesSchema
 from helpers.user import _user_exists
-from helpers.gender import _gender_name_to_uuid
+from helpers.gender import _gender_name_to_id
 
 from json import dumps
 
@@ -22,7 +22,7 @@ def _create_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Sess
     
     payload = jsonable_encoder(payload)
     target_gender_name = payload.get("target_gender")
-    tgid = _gender_name_to_uuid(target_gender_name, db=db)
+    tgid = _gender_name_to_id(target_gender_name, db=db)
 
     stmt = text("""
         INSERT INTO public.user_preferences (uid, target_gender_id, age_min, age_max, max_distance, extra_options)
@@ -38,7 +38,7 @@ def _update_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Sess
 
     payload = jsonable_encoder(payload)
     target_gender_name = payload.get("target_gender")
-    tgid = _gender_name_to_uuid(target_gender_name, db=db)
+    tgid = _gender_name_to_id(target_gender_name, db=db)
 
     stmt = text("""
         UPDATE public.user_preferences

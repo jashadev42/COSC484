@@ -8,10 +8,10 @@ from helpers.profile import _profile_exists
 from typing import List
 
 
-def _interest_name_to_uuid(name: str, db: Session) -> str | HTTPException:
-    uuid = db.execute(text("SELECT id FROM public.interests WHERE name = :name LIMIT 1"), {"name": name}).scalar()
-    if uuid:
-        return uuid
+def _interest_name_to_id(name: str, db: Session) -> str | HTTPException:
+    id = db.execute(text("SELECT id FROM public.interests WHERE name = :name LIMIT 1"), {"name": name}).scalar()
+    if id:
+        return id
     else:
         raise HTTPException(status_code=400, detail=f"User interest '{name}' is not registered in the database!")
 
@@ -22,12 +22,11 @@ def _interest_id_to_name(id: str, db: Session) -> str | HTTPException:
     else:
         raise HTTPException(status_code=400, detail=f"User interest with id '{id}' is not registered in the database!")
 
-
-def _interests_to_uuid_arr(arr: List[str], db: Session) -> List[str]:
+def _interests_to_id_arr(arr: List[str], db: Session) -> List[str]:
     res: list[str] = []
     for interest in arr:
-        uuid = _interest_name_to_uuid(name=interest, db=db)
-        res.append(uuid)
+        id = _interest_name_to_id(name=interest, db=db)
+        res.append(id)
     return res
 
 def _get_all_interest_options(db: Session):
@@ -38,7 +37,7 @@ def _get_profile_interests(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
         raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
 
-    rows = db.execute(text("SELECT * FROM public.user_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
+    rows = db.execute(text("SELECT interest_id FROM public.user_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
 
     return [
         {
@@ -52,7 +51,7 @@ def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Sessio
         raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
     
     payload = jsonable_encoder(payload)
-    interest_ids = _interests_to_uuid_arr(payload, db=db) # List of str
+    interest_ids = _interests_to_id_arr(payload, db=db) # List of str
     _delete_profile_interests(uid=uid, db=db) # Delete existing user interests for said user
 
     for interest_id in interest_ids:

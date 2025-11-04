@@ -5,7 +5,7 @@ from services.auth import auth_user
 from models.preferences import InterestsEnum
 
 from typing import List
-from helpers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_uuid, _interests_to_uuid_arr, _update_profile_interests
+from helpers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_id, _interests_to_id_arr, _update_profile_interests
 
 router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 

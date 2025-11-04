@@ -7,8 +7,8 @@ from services.auth import auth_user
 
 from models.profile import UserProfileSchema
 
-from .gender import _gender_name_to_uuid
-from .orientation import _orientation_name_to_uuid
+from .gender import _gender_name_to_id
+from .orientation import _orientation_name_to_id
 from .interests import _update_profile_interests
 
 from helpers.profile import _profile_exists
@@ -23,8 +23,8 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
         raise HTTPException(status_code=409, detail=f"Profile for user with uid '{uid}' is already created! Use 'PUT' to update it.")
 
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
-    gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
-    orientation_id = _orientation_name_to_uuid(name=payload.get("orientation"), db=db)
+    gender_id = _gender_name_to_id(name=payload.get("gender"), db=db)
+    orientation_id = _orientation_name_to_id(name=payload.get("orientation"), db=db)
 
     # Not finished with this
     stmt = text("""
@@ -130,8 +130,8 @@ def update_profile(
 
     payload = jsonable_encoder(payload)
     _update_profile_interests(payload=payload.get("interests"), uid=uid, db=db)
-    gender_id = _gender_name_to_uuid(name=payload.get("gender"), db=db)
-    orientation_id = _orientation_name_to_uuid(name=payload.get("orientation"), db=db)
+    gender_id = _gender_name_to_id(name=payload.get("gender"), db=db)
+    orientation_id = _orientation_name_to_id(name=payload.get("orientation"), db=db)
 
     stmt = text("""
         UPDATE public.profiles
