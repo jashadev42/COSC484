@@ -12,7 +12,7 @@ router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 # API ENDPOINTS
 @router.get("/")
 def get_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    _get_profile_interests(uid=uid, db=db)
+    return _get_profile_interests(uid=uid, db=db)
 
 @router.get("/options")
 def get_all_interest_options(db: Session = Depends(get_db)):

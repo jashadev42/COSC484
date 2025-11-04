@@ -15,6 +15,14 @@ def _interest_name_to_uuid(name: str, db: Session) -> str | HTTPException:
     else:
         raise HTTPException(status_code=400, detail=f"User interest '{name}' is not registered in the database!")
 
+def _interest_id_to_name(id: str, db: Session) -> str | HTTPException:
+    name = db.execute(text("SELECT name FROM public.interests WHERE id = :id LIMIT 1"), {"id": id}).scalar()
+    if name:
+        return name
+    else:
+        raise HTTPException(status_code=400, detail=f"User interest with id '{id}' is not registered in the database!")
+
+
 def _interests_to_uuid_arr(arr: List[str], db: Session) -> List[str]:
     res: list[str] = []
     for interest in arr:
@@ -30,8 +38,14 @@ def _get_profile_interests(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
         raise HTTPException(status=404, detail=f"Profile with id '{uid}' does not exist!")
 
-    res = db.execute(text("SELECT * FROM public.interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
-    return res
+    rows = db.execute(text("SELECT * FROM public.user_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
+
+    return [
+        {
+            "name": _interest_id_to_name(row["interest_id"], db),
+            "id": row["interest_id"]
+        } for row in rows
+    ]
 
 def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
