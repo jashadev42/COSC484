@@ -8,17 +8,17 @@ from services.db import get_db
 from helpers.preferences import _update_user_prefs, _create_user_prefs, _get_user_prefs
 from models.preferences import UserProfilePreferencesSchema
 
-router = APIRouter(prefix="/preferences", tags=["User: Preferences"])
+router = APIRouter(prefix="/me/preferences", tags=["User: Preferences"])
 
 # API ENDPOINTS
-@router.get("/")
-def get_user_prefs(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+@router.get("")
+def get_my_user_prefs(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_user_prefs(uid=uid, db=db)
 
-@router.put("/")
+@router.put("")
 def update_user_prefs(payload: UserProfilePreferencesSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _update_user_prefs(payload=payload, uid=uid, db=db)
 
-@router.post("/")
+@router.post("")
 def create_user_prefs(payload: UserProfilePreferencesSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _create_user_prefs(payload=payload, uid=uid, db=db)

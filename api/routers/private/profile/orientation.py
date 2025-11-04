@@ -1,0 +1,20 @@
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from services.db import get_db
+from services.auth import auth_user
+
+from models.preferences.orientation import SexualOrientationsEnum 
+from helpers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_id, _update_profile_orientation
+
+router = APIRouter(prefix="/orientation", tags=["Profile: Orientation"])
+
+@router.get("")
+def get_profile_orientation(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+    return _get_profile_orientation(uid=uid, db=db)
+    
+@router.put("")
+def update_profile_orientation(gender: SexualOrientationsEnum, uid = Depends(auth_user), db: Session = Depends(get_db)):
+    gid = _orientation_name_to_id(name=gender, db=db)
+    return _update_profile_orientation(orientation_id=gid, uid=uid, db=db)

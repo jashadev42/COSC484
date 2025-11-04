@@ -8,17 +8,12 @@ from services.auth import auth_user
 from models.preferences.orientation import SexualOrientationsEnum 
 from helpers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_id, _update_profile_orientation
 
-router = APIRouter(prefix="/orientation", tags=["Profile: Orientation"])
+router = APIRouter(tags=["Profile: Orientation"])
 
-@router.get("/options")
+@router.get("/orientations")
 def get_all_orientation_options(db: Session = Depends(get_db)):
     return _get_all_orientation_options(db=db)
 
-@router.get("/")
-def get_profile_orientation(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    return _get_profile_orientation(uid=uid, db=db)
-    
-@router.put("/")
-def update_profile_orientation(gender: SexualOrientationsEnum, uid = Depends(auth_user), db: Session = Depends(get_db)):
-    gid = _orientation_name_to_id(name=gender, db=db)
-    return _update_profile_orientation(orientation_id=gid, uid=uid, db=db)
+@router.get("/{target_uid}/orientation")
+def get_user_orientation(db: Session = Depends(get_db)):
+    pass

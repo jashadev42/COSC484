@@ -9,7 +9,7 @@ from fastapi.encoders import jsonable_encoder
 from typing import Annotated
 from helpers.auth import _register_user_phone, _check_phone_claimed_by
 
-router = APIRouter(prefix="/phone", tags=["Authentication: OTP (Phone)"])
+router = APIRouter(prefix="/phone", tags=["Authentication: Phone OTP"])
 
 """This sends a "short-code" (6 digits) to the desired phone number. Phone must be in 10 digit format (prefix +1)"""
 @router.get("/otp")

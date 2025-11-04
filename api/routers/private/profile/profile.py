@@ -15,6 +15,10 @@ from helpers.profile import _profile_exists
 
 router = APIRouter()
 
+@router.get("/")
+def get_my_profile(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+    pass
+
 """Used the first time after a user registers, to create their dating profile"""
 @router.post("/")
 def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):

@@ -10,23 +10,18 @@ from helpers.interests import _get_all_interest_options, _get_profile_interests,
 router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
 
 # API ENDPOINTS
-@router.get("/")
-def get_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+@router.get("")
+def get_my_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_profile_interests(uid=uid, db=db)
-
-@router.get("/options")
-def get_all_interest_options(db: Session = Depends(get_db)):
-    return _get_all_interest_options(db=db)
 
 """Take in an array of user interests, and update the public.user_interests to add those. 
 We delete previous interests because the payload will be the list of new interests, not just additional ones
 """
-@router.post("/")
+@router.post("")
 def update_profile_interests(payload: List[InterestsEnum], uid: str = Depends(auth_user), db: Session = Depends(get_db), ):
      return _update_profile_interests(payload=payload, uid=uid, db=db)
 
-
 """Delete all existing interests for a given user"""
-@router.delete("/")
+@router.delete("")
 def delete_profile_interests(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _delete_profile_interests(uid=uid, db=db)

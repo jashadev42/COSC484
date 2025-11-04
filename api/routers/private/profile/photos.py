@@ -13,7 +13,7 @@ from typing import Annotated, List
 
 router = APIRouter(prefix="/photos", tags=["Profile: Photos"])
 
-@router.get("/", response_model=List[PhotoMetaSchema])
+@router.get("", response_model=List[PhotoMetaSchema])
 async def get_profile_photos(uid: Annotated[str, Depends(auth_user)], user_jwt: Annotated[str, Depends(get_user_jwt)], db: Annotated[Session, Depends(get_db)]):
     storage = storage_for_user(user_jwt=user_jwt)
     result = await asyncio.to_thread(
@@ -26,7 +26,7 @@ async def get_profile_photos(uid: Annotated[str, Depends(auth_user)], user_jwt: 
 
     return result
 
-@router.post("/")
+@router.post("")
 async def add_profile_photo(photo: UploadFile, user_jwt: Annotated[str, Depends(get_user_jwt)], uid: Annotated[str, Depends(auth_user)], db: Annotated[Session, Depends(get_db)]):
     photo_bytes = await photo.read()
     if not photo_bytes:
@@ -50,7 +50,7 @@ async def add_profile_photo(photo: UploadFile, user_jwt: Annotated[str, Depends(
 
 import json
 
-@router.put("/")
+@router.put("")
 async def set_profile_photo(
     photo: Annotated[str, Form()],
     new_photo: UploadFile,
@@ -108,7 +108,7 @@ async def set_profile_photo_metadata(
         "photo": result,
     }
 
-@router.delete("/")
+@router.delete("")
 async def del_profile_photo(photo: PhotoSchema, user_jwt: Annotated[str, Depends(get_user_jwt)], uid: Annotated[str, Depends(auth_user)], db: Annotated[Session, Depends(get_db)]):
     storage = storage_for_user(user_jwt=user_jwt)
     result = await asyncio.to_thread(

@@ -7,10 +7,11 @@ from models.user import UserInfoSchema
 
 from helpers.user import _user_exists
 
-router = APIRouter()
+router = APIRouter(prefix="/me")
 
-@router.get("/")
-def get_user_info(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
+
+@router.get("")
+def get_my_user_info(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     stmt = text("""
         SELECT * FROM public.users WHERE id = :uid LIMIT 1
     """)
@@ -36,7 +37,7 @@ def toggle_pause_user(uid: str = Depends(auth_user), db: Session = Depends(get_d
     return user
 
 """Used the first time after a user registers, to set/update their non-changeable info (e.g. birthdate, first name, last name, etc.)"""
-@router.put("/")
+@router.put("")
 def set_user_info(payload: UserInfoSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     if not _user_exists(uid, db):
         raise HTTPException(status_code=404, detail=(f"User with id '{uid}' does not exist!"))
@@ -65,7 +66,7 @@ def set_user_info(payload: UserInfoSchema, uid: str = Depends(auth_user), db: Se
     # TODO: articulate which fields were changed in the return
     return {"ok": True}
 
-@router.delete("/")
+@router.delete("")
 def temp_delete_user(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     # DELETE FROM public.users WHERE id = :uid
     stmt = text("""
