@@ -5,13 +5,14 @@ from services.db import get_db
 
 from models.session import CreateSessionSchema
 
-from helpers.matchmaking import _join_queue, _leave_queue, _get_user_queue
+from helpers.matchmaking import _get_queue, _join_queue, _leave_queue
 
 router = APIRouter(prefix="/queue")
 
 @router.get("")
 def get_user_queue(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    return _get_user_queue(uid=uid, db=db)
+    print("HERE")
+    return _get_queue(uid=uid, db=db)
 
 @router.post("")
 def enqueue(uid: str = Depends(auth_user), db: Session = Depends(get_db)):

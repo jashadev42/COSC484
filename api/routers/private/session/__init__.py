@@ -5,5 +5,5 @@ from .matchmaking import router as matchmaking_router
 
 router = APIRouter(prefix="/session/me", tags=["Session"])
 
-router.include_router(session_router)
 router.include_router(matchmaking_router)
+router.include_router(session_router)
