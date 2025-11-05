@@ -7,11 +7,10 @@ from models.session import CreateSessionSchema
 
 from helpers.matchmaking import _get_queue, _join_queue, _leave_queue
 
-router = APIRouter(prefix="/queue")
+router = APIRouter(prefix="/me/queue")
 
 @router.get("")
 def get_user_queue(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    print("HERE")
     return _get_queue(uid=uid, db=db)
 
 @router.post("")
