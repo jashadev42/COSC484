@@ -11,17 +11,13 @@ from .gender import _gender_name_to_id
 from .orientation import _orientation_name_to_id
 from .interests import _update_profile_interests
 
-from helpers.profile import _profile_exists
+from helpers.profile import _profile_exists, _get_profile
 
 router = APIRouter()
 
 @router.get("/")
 def get_my_profile(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
-    stmt = text("""
-        SELECT * FROM public.profiles WHERE uid = :uid LIMIT 1
-    """)
-    profile = db.execute(stmt, {"uid": uid}).mappings().first()
-    return profile
+    return _get_profile(uid=uid, db=db)
 
 """Used the first time after a user registers, to create their dating profile"""
 @router.post("/")

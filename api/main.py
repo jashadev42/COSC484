@@ -9,6 +9,7 @@ from routers.public.user import router as public_user_router
 
 from routers.private.profile import router as private_profile_router
 from routers.private.user import router as private_user_router
+from routers.private.session import router as private_matchmaking_router
 
 
 @asynccontextmanager
@@ -26,6 +27,7 @@ public_router.include_router(public_profile_router)
 private_router = APIRouter(tags=["Private"])
 private_router.include_router(private_user_router)
 private_router.include_router(private_profile_router)
+private_router.include_router(private_matchmaking_router)
 
 app = FastAPI(title="Main API", lifespan=lifespan)
 app.include_router(private_router) # private needs to be mounted before public

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from models.moderation_status import ModerationStatusEnum 
+from .moderation_status import ModerationStatusEnum 
 from uuid import UUID
 from typing import Optional
 

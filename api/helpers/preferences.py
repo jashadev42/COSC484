@@ -19,7 +19,10 @@ def _user_prefs_exist(uid: str, db: Session):
 def _get_user_prefs(uid: str, db: Session):
     stmt = text("""SELECT * FROM public.user_preferences WHERE uid = :uid LIMIT 1""")
     prefs = db.execute(stmt, {"uid": uid}).mappings().one()
-    return prefs or None
+    if not prefs:
+        raise HTTPException(status_code=404, detail=f"User with id '{uid}' has no preferences!")
+        
+    return prefs 
 
 
 def _create_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Session):
