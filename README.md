@@ -63,6 +63,12 @@ SUPABASE_JWT_SECRET=""
 fastapi dev main.py
 ```
 
+### Access the API documentation
+ ```
+http://localhost:8000/docs
+```
+
+
 ## Frontend
 ### Install Dependencies
 ```bash
