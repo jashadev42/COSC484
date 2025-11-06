@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 # Import routers
@@ -11,6 +12,10 @@ from routers.private.profile import router as private_profile_router
 from routers.private.user import router as private_user_router
 from routers.private.session import router as private_matchmaking_router
 
+
+from services.db import get_db
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,9 +34,37 @@ private_router.include_router(private_user_router)
 private_router.include_router(private_profile_router)
 private_router.include_router(private_matchmaking_router)
 
+@private_router.get("/")
+def test(db: Session = Depends(get_db)):
+    stmt = text("""
+        SELECT * FROM public.users
+        WHERE first_name = 'Nate'
+        LIMIT 1
+    """)
+    user = db.execute(stmt).mappings().first()
+    return user
+
+origins = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+]
+
+
 app = FastAPI(title="Main API", lifespan=lifespan)
+
+# So server can be queried from frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.include_router(private_router) # private needs to be mounted before public
 app.include_router(public_router)
 
 # Mount static files (e.g. images, JS, CSS)
 app.mount("/static", StaticFiles(directory="static"), name="static")
+

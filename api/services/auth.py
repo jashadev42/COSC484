@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from dotenv import load_dotenv
 
+
 from typing import Annotated
 
 """

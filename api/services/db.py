@@ -40,7 +40,6 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-        print("DB CONNECTED")
         db.commit()
     except Exception:
         db.rollback()
