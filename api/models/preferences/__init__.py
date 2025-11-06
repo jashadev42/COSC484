@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
-from .genders import GendersEnum
+from .genders import GendersEnum, UpdateGenderSchema
 from .interests import InterestsEnum 
 from .pronouns import PronounsEnum
 from .relationship_goals import RelationshipGoalsEnum

@@ -5,7 +5,7 @@ from sqlalchemy import text
 from services.db import get_db
 from services.auth import auth_user
 
-from models.preferences.orientation import SexualOrientationsEnum 
+from models.preferences.orientation import UpdateSexualOrientationSchema
 from helpers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_id, _update_profile_orientation
 
 router = APIRouter(prefix="/orientation", tags=["Profile: Orientation"])
@@ -15,6 +15,7 @@ def get_profile_orientation(uid: str = Depends(auth_user), db: Session = Depends
     return _get_profile_orientation(uid=uid, db=db)
     
 @router.put("")
-def update_profile_orientation(gender: SexualOrientationsEnum, uid = Depends(auth_user), db: Session = Depends(get_db)):
-    gid = _orientation_name_to_id(name=gender, db=db)
+def update_profile_orientation(payload: UpdateSexualOrientationSchema, uid = Depends(auth_user), db: Session = Depends(get_db)):
+    payload = jsonable_encoder(payload)
+    gid = _orientation_name_to_id(name=payload.get("orientation"), db=db)
     return _update_profile_orientation(orientation_id=gid, uid=uid, db=db)

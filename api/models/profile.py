@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 # Enums
 from .preferences.genders import GendersEnum
+from .preferences.orientation import SexualOrientationsEnum, UpdateSexualOrientationSchema
 from .preferences.interests import InterestsEnum 
 from .preferences.pronouns import PronounsEnum
 from .preferences.relationship_goals import RelationshipGoalsEnum
@@ -33,7 +34,7 @@ class UserProfileSchema(BaseModel):
 
     # These two will need to be converted to their fk UUID by the backend
     gender: Optional[GendersEnum] = None
-    orientation: Optional[GendersEnum] = None
+    orientation: Optional[SexualOrientationsEnum] = None
     interests: List[InterestsEnum] = None
     # # # (e.g. SELECT id FROM public.genders WHERE name = :gender) # # #
 

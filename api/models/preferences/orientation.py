@@ -1,4 +1,5 @@
 from enum import Enum
+from pydantic import BaseModel
 
 class SexualOrientationsEnum(str, Enum):
     straight = "straight" # Attraction to the opposite gender
@@ -16,3 +17,6 @@ class SexualOrientationsEnum(str, Enum):
     heteroflexible = "heteroflexible" # Primarily straight, occasional same-sex attraction
     homoflexible = "homoflexible" # Primarily gay/lesbian, occasional opposite-sex attraction
     skoliosexual = "skoliosexual" # Attraction to nonbinary or gender-nonconforming people
+
+class UpdateSexualOrientationSchema(BaseModel):
+    orientation: SexualOrientationsEnum
