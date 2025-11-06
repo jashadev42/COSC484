@@ -17,13 +17,12 @@ Either party can “swipe left” and reject at anytime or they can like and it 
 liked you!” in the chat. Liking someone would save/bookmark the chat so you can go back to it.
 You can also have your contact info saved so you can quick send during a live chat.
 
-#### Potential Tech Stack:
+#### Tech Stack:
 - React (with TypeScript)
-- SQL database technology (need to choose)
-- socket.io (handles web sockets)
-- Authentification (sign in with google)? JWT (handles username/password)?
-- Python backend server (connecting users to each other, handles api route endpoints,
-posting/updating/deleting pictures and information from your profile)
+- Supabase (postgresql)
+  - Authentication via phone otp
+- Socket.io (handles web sockets)
+- FastAPI Python API Backend
 
 
 # Development Environment
@@ -44,14 +43,19 @@ pip install -r requirements.txt
 .venv/Scripts/activate 
 ```
 
-### Set Environment Variables in /api
+### Set Environment Variables `.env` in /api
 Use database information in the following format:
 ```bash
-user={}
-password={}
-host={}
-port={} 
-dbname={}
+user=""
+password=""
+host=""
+port=""
+dbname=""
+
+SUPABASE_URL=""
+SUPABASE_ANON_KEY=""
+SUPABASE_SERVICE_KEY=""
+SUPABASE_JWT_SECRET=""
 ```
 
 ### Running the API
@@ -59,11 +63,10 @@ dbname={}
 fastapi dev main.py
 ```
 
-
 ## Frontend
 ### Install Dependencies
 ```bash
-cd spark-app
+cd frontend
 npm install
 ```
 
@@ -74,5 +77,5 @@ npm run dev
 
 ### Connect via Browser URL
 ```
-http://localhost:3000
+http://localhost:5173
 ```
