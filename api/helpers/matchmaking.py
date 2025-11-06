@@ -13,7 +13,7 @@ def _get_queue(uid: str, db: Session):
     print("HERE")
     stmt = text("""
         SELECT *
-        FROM public.matchmaking_queue
+        FROM sessions.matchmaking_queue
         WHERE uid = :uid
         LIMIT 1
     """)
@@ -27,7 +27,7 @@ def _get_queue(uid: str, db: Session):
 def _user_in_queue(uid: str, db: Session):
     stmt = text("""
         SELECT *
-        FROM public.matchmaking_queue
+        FROM sessions.matchmaking_queue
         WHERE uid = :uid
         LIMIT 1
     """)
@@ -42,7 +42,7 @@ def _join_queue(uid: str, db: Session):
     user_profile = _get_profile(uid=uid, db=db)
     
     stmt = text("""
-        INSERT INTO public.matchmaking_queue
+        INSERT INTO sessions.matchmaking_queue
             (uid, prefs_snapshot, location_snapshot, expires_at)
         VALUES (:uid, CAST(:prefs_snapshot AS jsonb), CAST(:location_snapshot AS jsonb), :expires_at)
         RETURNING *
@@ -66,7 +66,7 @@ def _leave_queue(uid: str, db: Session):
         raise HTTPException(status_code=404, detail=f"User with uid '{uid}' is not in the queue!")
     
     stmt = text("""
-        DELETE FROM public.matchmaking_queue
+        DELETE FROM sessions.matchmaking_queue
         WHERE uid = :uid
         RETURNING *
     """)

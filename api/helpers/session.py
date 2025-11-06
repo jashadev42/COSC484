@@ -15,7 +15,7 @@ def _user_in_session(uid: str, db: Session):
 def _get_all_user_sessions(uid: str, db: Session):
     stmt = text("""
         SELECT *
-        FROM public.sessions
+        FROM sessions.sessions
         WHERE (
             host_uid = :uid OR guest_uid = :uid
         )
@@ -27,7 +27,7 @@ def _get_all_user_sessions(uid: str, db: Session):
 def _get_active_session(uid: str, db: Session):
     stmt = text("""
         SELECT *
-        FROM public.sessions
+        FROM sessions.sessions
         WHERE (
             host_uid = :uid OR guest_uid = :uid
         ) AND status = 'open'
@@ -52,7 +52,7 @@ def _create_session(payload: CreateSessionSchema, host_uid: str, db: Session):
     _leave_queue(uid=host_uid, db=db)
     
     stmt = text("""
-        INSERT INTO public.sessions (status, host_uid, mode_id)
+        INSERT INTO sessions.sessions (status, host_uid, mode_id)
         VALUES (:status, :host_uid, :mode_id)
         RETURNING *
     """)
@@ -70,7 +70,7 @@ def _join_session(guest_uid: str, db: Session):
 
     # TODO: Make sure the guest_uid preferences are compatible with the session host first
     stmt = text("""
-        UPDATE public.sessions
+        UPDATE sessions.sessions
         SET guest_uid = :guest_uid
         WHERE (
             closed_at IS NULL
@@ -99,7 +99,7 @@ def _leave_session(uid: str, db: Session):
     session = _get_active_session(uid=uid, db=db)
     
     stmt = text("""
-        UPDATE public.sessions
+        UPDATE sessions.sessions
         SET 
             status = CASE 
                 -- If host is leaving and no guest, close session
@@ -132,7 +132,7 @@ def _leave_session(uid: str, db: Session):
     # If guest is leaving, set guest_uid to NULL
     if res['guest_uid'] == uid:
         clear_guest_stmt = text("""
-            UPDATE public.sessions
+            UPDATE sessions.sessions
             SET guest_uid = NULL
             WHERE id = :session_id
             RETURNING *

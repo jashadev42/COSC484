@@ -21,7 +21,7 @@ from .smoke_frequency import SmokeFrequencyEnum
 from .sleep_schedule import SleepScheduleEnum
 from .zodiac_signs import ZodiacSignsEnum 
 
-# Mirror the settings in public.profiles table
+# Mirror the settings in profiles.profiles table
 class ExtraPreferenceOptionsSchema(BaseModel):
     school: Optional[str] = None
     drug_use: Optional[bool] = None

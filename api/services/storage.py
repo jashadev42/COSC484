@@ -23,7 +23,7 @@ def _mime_to_ext(mime_type: str):
 
 def _photo_exists(uid: str, id: str, db: Session):
     stmt = text("""
-        SELECT 1 FROM public.profile_photos WHERE id = :id AND uid = :uid;
+        SELECT 1 FROM profiles.photos WHERE id = :id AND uid = :uid;
     """)
     row = db.execute(stmt, {"id": id, "uid": uid})
     return bool(row)
@@ -43,7 +43,7 @@ def get_user_photos(
 
     stmt = text(f"""
         SELECT id, uid, path, mime_type, size_bytes, slot, is_primary, moderation_status, created_at
-        FROM public.profile_photos
+        FROM profiles.photos
         WHERE {' AND '.join(where)}
         ORDER BY is_primary DESC, created_at DESC
     """)
@@ -105,7 +105,7 @@ def upload_profile_photo(
         raise HTTPException(status_code=400, detail=f"There can only be a maximum of {MAX_PHOTOS} per user!")
 
     stmt = text("""
-        INSERT INTO public.profile_photos 
+        INSERT INTO profiles.photos 
             (id, uid, bucket, path, mime_type, size_bytes, slot)
         VALUES
             (:photo_id, :uid, :bucket, :path, :mime_type, :size_bytes, :slot)
@@ -141,7 +141,7 @@ def delete_profile_photo(photo: PhotoSchema, uid: str, storage: SyncStorageClien
         raise HTTPException(status_code=400, detail=f"The user with uid '{uid}' has no photos uploaded!")
 
     stmt = text("""
-        DELETE FROM public.profile_photos WHERE id = :id AND uid = :uid;
+        DELETE FROM profiles.photos WHERE id = :id AND uid = :uid;
     """)
 
     row = db.execute(stmt, {"id": photo.id, "uid": uid})
@@ -157,7 +157,7 @@ def update_profile_photo(photo: PhotoSchema, mime_type: str, file_bytes: bytes, 
         raise HTTPException(status_code=404, detail=f"The photo with id '{photo.id}' does not exist!")
     
     stmt = text("""
-        UPDATE public.profile_photos 
+        UPDATE profiles.photos 
         SET updated_at = now(), 
             size_bytes = :size_bytes, 
             mime_type = :mime_type
@@ -200,7 +200,7 @@ def update_profile_photo_metadata(photo: PhotoSchema, metadata: PhotoMetadataSch
         raise HTTPException(status_code=404, detail=f"The photo with id '{photo.id}' does not exist!")
     
     stmt = text("""
-        UPDATE public.profile_photos
+        UPDATE profiles.photos
         SET
             updated_at = now(),
             slot = COALESCE(:slot, slot),

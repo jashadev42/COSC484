@@ -32,7 +32,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
 
     # Not finished with this
     stmt = text("""
-    INSERT INTO public.profiles (
+    INSERT INTO profiles.profiles (
         uid,
         bio,
         drug_use,
@@ -140,7 +140,7 @@ def update_profile(
     orientation_id = _orientation_name_to_id(name=payload.get("orientation"), db=db)
 
     stmt = text("""
-        UPDATE public.profiles
+        UPDATE profiles.profiles
         SET
             bio = :bio,
             drug_use = :drug_use,

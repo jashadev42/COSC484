@@ -13,11 +13,11 @@ def _user_prefs_exist(uid: str, db: Session):
     if not _user_exists(uid=uid, db=db):
         raise HTTPException(status_code=404, detail=f"User with id '{uid}' does not exist!")
 
-    stmt = text("""SELECT 1 FROM public.user_preferences WHERE uid = :uid LIMIT 1""")
+    stmt = text("""SELECT 1 FROM users.preferences WHERE uid = :uid LIMIT 1""")
     return bool(db.execute(stmt, {"uid": uid}).scalar())
 
 def _get_user_prefs(uid: str, db: Session):
-    stmt = text("""SELECT * FROM public.user_preferences WHERE uid = :uid LIMIT 1""")
+    stmt = text("""SELECT * FROM users.preferences WHERE uid = :uid LIMIT 1""")
     prefs = db.execute(stmt, {"uid": uid}).mappings().one()
     if not prefs:
         raise HTTPException(status_code=404, detail=f"User with id '{uid}' has no preferences!")
@@ -34,7 +34,7 @@ def _create_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Sess
     tgid = _gender_name_to_id(target_gender_name, db=db)
 
     stmt = text("""
-        INSERT INTO public.user_preferences (uid, target_gender_id, age_min, age_max, max_distance, extra_options)
+        INSERT INTO users.preferences (uid, target_gender_id, age_min, age_max, max_distance, extra_options)
             VALUES (:uid, :tgid, :age_min, :age_max, :max_distance, :extra_options)
     """)
 
@@ -50,7 +50,7 @@ def _update_user_prefs(payload: UserProfilePreferencesSchema, uid: str, db: Sess
     tgid = _gender_name_to_id(target_gender_name, db=db)
 
     stmt = text("""
-        UPDATE public.user_preferences
+        UPDATE users.preferences
         SET 
             target_gender_id = :tgid,
             age_min = :age_min,

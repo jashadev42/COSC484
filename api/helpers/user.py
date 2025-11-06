@@ -8,14 +8,14 @@ from models.user import UserInfoSchema
 def _user_exists(uid: str, db: Session) -> bool:
     return bool(
         db.execute(
-            text("SELECT 1 FROM public.users WHERE id = :id LIMIT 1"),
+            text("SELECT 1 FROM users.users WHERE id = :id LIMIT 1"),
             {"id": uid}
         ).scalar()
     )
     
 def _create_user(uid: str, phone: str, db: Session):
     stmt = text("""
-        INSERT INTO public.users (id, phone, created_at)
+        INSERT INTO users.users (id, phone, created_at)
         VALUES (:id, :phone, now())
     """)
     
@@ -25,7 +25,7 @@ def _create_user(uid: str, phone: str, db: Session):
 def _get_user_by_id(uid: str, db: Session):
     """Private helper to fetch user by ID"""
     stmt = text("""
-        SELECT * FROM public.users WHERE id = :uid LIMIT 1
+        SELECT * FROM users.users WHERE id = :uid LIMIT 1
     """)
     return db.execute(stmt, {"uid": uid}).mappings().first()
 
@@ -36,7 +36,7 @@ def _toggle_user_pause(uid: str, db: Session):
         raise HTTPException(status_code=404, detail="User not found")
 
     stmt = text("""
-        UPDATE public.users 
+        UPDATE users.users 
         SET paused = NOT paused
         WHERE id = :uid
         RETURNING *
@@ -51,7 +51,7 @@ def _update_user_info(payload: UserInfoSchema, uid: str, db: Session):
     
     payload = jsonable_encoder(payload)
     stmt = text("""
-        UPDATE public.users AS u
+        UPDATE users.users AS u
         SET
         first_name = COALESCE(NULLIF(u.first_name, ''), :fn),
         last_name  = COALESCE(NULLIF(u.last_name,  ''), :ln),
@@ -74,7 +74,7 @@ def _soft_delete_user(uid: str, db: Session):
         raise HTTPException(status_code=404, detail="User not found")
 
     stmt = text("""
-        UPDATE public.users 
+        UPDATE users.users 
         SET deleted_at = now()
         WHERE id = :uid
         RETURNING *

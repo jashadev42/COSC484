@@ -26,7 +26,7 @@ def _get_profile_orientation(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
         raise HTTPException(status_code=404, detail=f"Profile with uid '{uid}' does not exist!")
    
-    orientation_id = db.execute(text("SELECT orientation_id FROM public.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).scalar()
+    orientation_id = db.execute(text("SELECT orientation_id FROM profiles.profiles WHERE uid = :uid LIMIT 1"), {"uid": uid}).scalar()
     return {
         "name": _orientation_id_to_name(id=orientation_id, db=db),
         "id": orientation_id
@@ -37,7 +37,7 @@ def _update_profile_orientation(orientation_id: str, uid: str, db: Session):
         raise HTTPException(status_code=404, detail=f"Profile with uid '{uid}' does not exist!")
     
     stmt = text("""
-        UPDATE public.profiles
+        UPDATE profiles.profiles
         SET orientation_id = :orientation_id
         WHERE uid = :uid
     """)

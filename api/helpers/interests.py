@@ -38,7 +38,7 @@ def _get_profile_interests(uid: str, db: Session):
     if not _profile_exists(uid=uid, db=db):
         raise HTTPException(status_code=404, detail=f"Profile with id '{uid}' does not exist!")
 
-    rows = db.execute(text("SELECT interest_id FROM public.profile_interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
+    rows = db.execute(text("SELECT interest_id FROM profiles.interests WHERE uid = :uid"), {"uid": uid}).mappings().all()
 
     return [
         {
@@ -57,7 +57,7 @@ def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Sessio
 
     for interest_id in interest_ids:
         stmt = text("""
-            INSERT INTO public.profile_interests (uid, interest_id)
+            INSERT INTO profiles.interests (uid, interest_id)
             VALUES (:uid, :interest_id)
         """)
         db.execute(stmt, {"uid": uid, "interest_id": interest_id})
@@ -66,7 +66,7 @@ def _update_profile_interests(payload: List[InterestsEnum], uid: str, db: Sessio
 """Delete all existing interests for a given user"""
 def _delete_profile_interests(uid: str, db: Session):
     stmt = text("""
-        DELETE FROM public.profile_interests
+        DELETE FROM profiles.interests
         WHERE uid = :uid
     """)
     db.execute(stmt, {"uid": uid})

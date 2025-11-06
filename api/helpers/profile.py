@@ -10,14 +10,14 @@ def _profile_exists(uid: str, db: Session) -> bool:
     
     return bool(
         db.execute(
-            text("""SELECT 1 FROM public.profiles WHERE uid = :uid LIMIT 1"""),
+            text("""SELECT 1 FROM profiles.profiles WHERE uid = :uid LIMIT 1"""),
             {"uid": uid}
         ).scalar()
     )
 
 def _get_profile(uid: str, db: Session):
     stmt = text("""
-        SELECT * FROM public.profiles WHERE uid = :tuid LIMIT 1
+        SELECT * FROM profiles.profiles WHERE uid = :tuid LIMIT 1
     """)
     profile = db.execute(stmt, {'tuid': uid}).mappings().first()
     

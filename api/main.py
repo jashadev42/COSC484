@@ -34,21 +34,10 @@ private_router.include_router(private_user_router)
 private_router.include_router(private_profile_router)
 private_router.include_router(private_matchmaking_router)
 
-@private_router.get("/")
-def test(db: Session = Depends(get_db)):
-    stmt = text("""
-        SELECT * FROM public.users
-        WHERE first_name = 'Nate'
-        LIMIT 1
-    """)
-    user = db.execute(stmt).mappings().first()
-    return user
-
 origins = [
     "http://localhost:5173",
     "http://localhost:8000",
 ]
-
 
 app = FastAPI(title="Main API", lifespan=lifespan)
 
