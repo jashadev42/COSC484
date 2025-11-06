@@ -1,23 +1,20 @@
 import { useState } from 'react'
 import TitleBarComponent from './components/TitleBarComponent'
-import PhoneAuthComponent from './components/PhoneAuthComponent'
+import PhoneAuthFormComponent from './components/PhoneAuthFormComponent'
 import './index.css'
 
-function App() {
+export default function App() {
     return (
         <section className='flex flex-col w-full h-full'>
             <header>
                 <TitleBarComponent/>
             </header>
             <main className='flex w-full justify-center '>
-                {/*  */}
-                <PhoneAuthComponent/>
+                <PhoneAuthFormComponent/>
             </main>
             <footer>
-                {/*  */}
+                <div>footer</div>
             </footer>
         </section>
     )
 }
-
-export default App

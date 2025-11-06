@@ -39,6 +39,7 @@ origins = [
     "http://localhost:8000",
 ]
 
+
 app = FastAPI(title="Main API", lifespan=lifespan)
 
 # So server can be queried from frontend
