@@ -36,8 +36,12 @@ function AppHeader() {
     <header className="w-full border-b border-[rgba(255,255,255,0.06)]" style={{background: "var(--color-darkest)"}}>
       <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[var(--color-primary)]"><IconSpark /></span>
-          <span className="text-xl font-semibold" style={{fontFamily: "var(--font-title)"}}>spark</span>
+          <img 
+            src="/spark.svg" 
+            alt="Spark logo"
+            className="h-10 w-20"
+            draggable="false"
+        />
         </div>
         {isChats && (
           <button className="bg-transparent text-sm text-neutral-300 hover:opacity-80">Select</button>
