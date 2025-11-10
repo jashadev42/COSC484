@@ -13,7 +13,6 @@ export default function App() {
                 <PhoneAuthFormComponent/>
             </main>
             <footer>
-                <div>footer</div>
             </footer>
         </section>
     )

@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);       // { id, ... }
     const [otpSent, setOtpSent] = useState(false);
 
-    // Rehydrate from localStorage on mount ---
+    // Rehydrate from localStorage on mount
     useEffect(() => {
         try {
             const raw = localStorage.getItem("authData");
@@ -47,12 +47,16 @@ export function AuthProvider({ children }) {
 
     const requestOtp = useCallback(async (phone) => {
         setError("");
-        if (!phone) throw new Error("Phone number can't be blank!");
+        if (!phone) {
+            setError("Phone number can't be blank!")
+            throw new Error("Phone number can't be blank!");
+        }
         setLoading(true);
         try {
             const res = await fetch(`${apiUrl}/auth/phone/otp?phone=${encodeURIComponent(phone)}`);
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || res.statusText || "Failed to send OTP");
                 throw new Error(errorData.message || res.statusText || "Failed to send OTP");
             }
             await res.json().catch(() => ({}));
@@ -67,8 +71,14 @@ export function AuthProvider({ children }) {
 
     const verifyOtp = useCallback(async ({ phone, code }) => {
         setError("");
-        if (!phone || !code) throw new Error("Phone and 6-digit code are required");
-        if (String(code).length < 6) throw new Error("OTP codes are 6 digits");
+        if (!phone || !code) {
+            setError("Phone and 6-digit code are required");
+            throw new ("Phone and 6-digit code are required");
+        }
+        if (String(code).length < 6) {
+            setError("OTP codes are 6 digits!");
+            throw new ("OTP codes are 6 digits!");
+        }
         setLoading(true);
         try {
             const res = await fetch(`${apiUrl}/auth/phone/otp`, {
@@ -78,6 +88,7 @@ export function AuthProvider({ children }) {
             });
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
+                setError(errorData.message || `Authentication failed with status ${res.status}`);
                 throw new Error(errorData.message || `Authentication failed with status ${res.status}`);
             }
             const data = await res.json();
@@ -93,7 +104,7 @@ export function AuthProvider({ children }) {
         }
     }, [apiUrl, persist]);
 
-    // Add Authorization header automatically using current token
+    // Add authorization header automatically using current token
     const fetchWithAuth = useCallback(async (path, init = {}) => {
         const token = session?.access_token;
         const headers = new Headers(init.headers || {});
