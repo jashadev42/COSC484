@@ -1,20 +1,26 @@
-import { useState } from 'react'
-import TitleBarComponent from './components/TitleBarComponent'
-import PhoneAuthFormComponent from './components/PhoneAuthFormComponent'
-import './index.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SignUpLanding from "./pages/SignUpLanding";
+import PhoneAuthPage from "./pages/PhoneAuthPage";
+import { AppRoutes } from "./pages/AppShell";
 
 export default function App() {
-    return (
-        <section className='flex flex-col w-full h-full'>
-            <header>
-                <TitleBarComponent/>
-            </header>
-            <main className='flex w-full justify-center '>
-                <PhoneAuthFormComponent/>
-            </main>
-            <footer>
-                <div>footer</div>
-            </footer>
-        </section>
-    )
+  const isAuthed = true;
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SignUpLanding />} />
+        <Route path="/auth/phone" element={<PhoneAuthPage />} />
+      </Routes>
+
+      {/* Auth-gated app area */}
+      {isAuthed ? (
+        <AppRoutes />
+      ) : (
+        <Routes>
+          <Route path="/app/*" element={<Navigate to="/" replace />} />
+        </Routes>
+      )}
+    </BrowserRouter>
+  );
 }
