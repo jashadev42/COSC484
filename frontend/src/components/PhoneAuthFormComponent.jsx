@@ -18,13 +18,15 @@ export default function PhoneAuthFormComponent() {
 
     return (
         <div className="flex flex-col justify-center space-y-12 max-w-98 font-normal">
+
             <form className="flex flex-col" onChange={() => setError("")} onSubmit={onGetOtp}>
                 {error && <p className="text-red">{error}</p>}
+                <h1 className="whitespace-nowrap">Enter phone number in +1 format:</h1>
                 <input
                     name="phoneNumber"
                     type="tel"
-                    className="outline-none text-center px-4 text-5xl"
-                    placeholder="Enter phone number in +1 format"
+                    className="outline-none text-center px-4 text-6xl"
+                    placeholder="+1 123 456 7891"
                     onChange={(e) => setPhone(e.target.value)}
                     required
                     disabled={loading}
@@ -34,7 +36,7 @@ export default function PhoneAuthFormComponent() {
 
             {otpSent && !session && (
                 <div className="text-center">
-                    <h1 className="whitespace-nowrap"><span className='text-primary'>code sent!</span> your phone should get a otp code shortly</h1>
+                    <h1 className="whitespace-nowrap"><span className='text-primary'>code sent!</span> your phone should recieve an otp code shortly</h1>
                     <form className="flex flex-col" onSubmit={onVerify}>
                         <input
                             inputMode="numeric"
