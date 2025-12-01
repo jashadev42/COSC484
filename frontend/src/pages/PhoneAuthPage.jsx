@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import TitleBarComponent from "../components/TitleBarComponent";
-import PhoneAuthFormComponent from "../components/PhoneAuthFormComponent";
+import TitleBarComponent from "../TitleBarComponent";
+import PhoneAuthFormComponent from "../PhoneAuthFormComponent";
 
 export default function PhoneAuthPage() {
   const navigate = useNavigate();

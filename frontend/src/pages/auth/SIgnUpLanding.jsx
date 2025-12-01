@@ -1,3 +1,4 @@
+// src/pages/auth/SignUpLanding.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,11 +10,11 @@ export default function SignUpLanding() {
       <div className="w-full max-w-sm text-center">
         {/* Logo */}
         <div className="flex items-center justify-center mb-10">
-            <img
-                src="/spark-logo-gold.svg"
-                alt="Spark logo"
-                className="h-40 w-40"
-            />
+          <img
+            src="/spark-logo-gold.svg"
+            alt="Spark logo"
+            className="h-40 w-40"
+          />
         </div>
 
         {/* Heading */}
@@ -24,7 +25,7 @@ export default function SignUpLanding() {
         {/* Primary */}
         <button
           onClick={() => navigate("/auth/phone")}
-          className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold transition-colors shadow-md"
+          className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold text-black transition-colors shadow-md"
         >
           Use phone number
         </button>

@@ -1,26 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import SignUpLanding from "./pages/SignUpLanding";
-import PhoneAuthPage from "./pages/PhoneAuthPage";
-import { AppRoutes } from "./pages/AppShell";
+// src/App.jsx
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import AppRoutes from "./AppRoutes.jsx";
 
 export default function App() {
-  const isAuthed = true;
-
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<SignUpLanding />} />
-        <Route path="/auth/phone" element={<PhoneAuthPage />} />
-      </Routes>
-
-      {/* Auth-gated app area */}
-      {isAuthed ? (
+      <AuthProvider>
         <AppRoutes />
-      ) : (
-        <Routes>
-          <Route path="/app/*" element={<Navigate to="/" replace />} />
-        </Routes>
-      )}
+      </AuthProvider>
     </BrowserRouter>
   );
 }
