@@ -1,9 +1,10 @@
 // src/pages/auth/SignUpLanding.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function SignUpLanding() {
   const navigate = useNavigate();
+  const [phoneInput, setPhoneInput] = useState(false);
 
   return (
     <div className="min-h-screen w-full text-white flex items-center justify-center p-6">
@@ -22,7 +23,7 @@ export default function SignUpLanding() {
           Sign up to continue
         </h1>
 
-        {/* Primary */}
+        {/* Button */} 
         <button
           onClick={() => navigate("/auth/phone")}
           className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold text-black transition-colors shadow-md"
