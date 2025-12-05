@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from services.db import get_db
-from services.auth import auth_user
+from models.db import get_db
+from middleware.auth import auth_user
 
-from models.preferences import GendersEnum
-from helpers.gender import _gender_name_to_id, _get_all_gender_options, _get_profile_gender, _update_profile_gender
+from schemas.preferences import GendersEnum
+from controllers.gender import _gender_name_to_id, _get_all_gender_options, _get_profile_gender, _update_profile_gender
 
 from sqlalchemy import text
 from typing import Annotated
-from helpers.profile import _profile_exists
+from controllers.profile import _profile_exists
 
 router = APIRouter(tags=["Profile: Gender"])
 

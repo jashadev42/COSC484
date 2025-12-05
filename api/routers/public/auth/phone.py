@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from services.db import get_db
+from models.db import get_db
 from services.otp import send_otp, verify_otp
 from fastapi.encoders import jsonable_encoder
-from models.auth.phone import PhoneOTPAnswerSchema
+from schemas.auth.phone import PhoneOTPAnswerSchema
 
 from typing import Annotated
-from helpers.auth import _register_user_phone, _check_phone_claimed_by
+from controllers.auth import _register_user_phone, _check_phone_claimed_by
 
 router = APIRouter(prefix="/phone", tags=["Authentication: Phone OTP"])
 

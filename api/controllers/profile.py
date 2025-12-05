@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi import HTTPException
 
-from helpers.user import _user_exists
+from controllers.user import _user_exists
 
 def _profile_exists(uid: str, db: Session) -> bool:
     if not _user_exists(uid=uid, db=db):

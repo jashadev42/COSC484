@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from services.auth import auth_user
-from services.db import get_db
+from middleware.auth import auth_user
+from models.db import get_db
 
-from models.session import CreateSessionSchema
+from schemas.session import CreateSessionSchema
 
-from helpers.matchmaking import _get_queue, _join_queue, _leave_queue
+from controllers.matchmaking import _get_queue, _join_queue, _leave_queue
 
 router = APIRouter(prefix="/me/queue")
 

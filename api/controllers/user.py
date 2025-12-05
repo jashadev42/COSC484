@@ -3,7 +3,7 @@ from sqlalchemy import text
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 
-from models.user import UserInfoSchema
+from schemas.user import UserInfoSchema
 
 def _user_exists(uid: str, db: Session) -> bool:
     return bool(

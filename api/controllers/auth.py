@@ -1,14 +1,14 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from helpers.user import _user_exists
+from controllers.user import _user_exists
 
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
-from helpers.user import _create_user
+from controllers.user import _create_user
 
 def _check_phone_claimed_by(phone: str, db: Session):
-    stmt = text("SELECT id from public.users WHERE phone = :phone LIMIT 1")
+    stmt = text("SELECT id from users.users WHERE phone = :phone LIMIT 1")
     claimed_by = db.execute(stmt, {"phone": phone}).scalar()
     # Convert UUID to string for comparison
     if claimed_by is not None:
