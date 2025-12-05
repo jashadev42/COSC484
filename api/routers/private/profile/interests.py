@@ -7,7 +7,7 @@ from schemas.preferences import InterestsEnum
 from typing import List
 from controllers.interests import _get_all_interest_options, _get_profile_interests, _delete_profile_interests, _interest_name_to_id, _interests_to_id_arr, _update_profile_interests
 
-router = APIRouter(prefix="/interests", tags=["Profile: Interests"])
+router = APIRouter(prefix="/me/interests", tags=["Profile: Interests"])
 
 # API ENDPOINTS
 @router.get("")

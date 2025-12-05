@@ -1,10 +1,10 @@
-import os
 from supabase import create_client, Client
 from storage3 import SyncStorageClient as StorageClient
+from config import settings
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
-SUPABASE_SERVICE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+SUPABASE_URL = settings.supabase_url
+SUPABASE_ANON_KEY = settings.supabase_anon_key
+SUPABASE_SERVICE_KEY = settings.supabase_service_key
 
 def supabase_for_user(user_jwt: str) -> Client:
     client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)

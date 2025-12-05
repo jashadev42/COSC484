@@ -1,7 +1,6 @@
-import os
-from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from config import settings
 
 """
 THE PURPOSE OF THIS FILE IS TO CREATE A REUSABLE SINGLETON SESSION WITH THE SUPABASE DATABASE
@@ -11,13 +10,11 @@ IT HAS A VERBOSE SAFETY ROLLBACK ALTHOUGH THIS IS REDUNDANT BECAUSE WHEN USING T
 USE 'with db.begin():' WHICH AUTOMATICALLY COMMITS IF NO EXCEPTIONS / ROLLBACK IF THERE ARE EXCEPTIONS
 """
 
-load_dotenv() # Load env variables
-
-USER = os.getenv("user")
-PASSWORD = os.getenv("password")
-HOST = os.getenv("host")
-PORT = os.getenv("port")
-DBNAME = os.getenv("dbname")
+USER = settings.db_user
+PASSWORD = settings.db_pass
+HOST = settings.db_host
+PORT = settings.db_port
+DBNAME = settings.db_name
 
 if not all([USER, PASSWORD, HOST, PORT, DBNAME]):
     raise RuntimeError("Missing DB configuration variables")

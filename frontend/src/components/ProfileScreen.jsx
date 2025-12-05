@@ -123,7 +123,7 @@ function ProfileView({
           </div>
           <div className="flex justify-between">
             <dt className="text-[#C7C4A7]">Languages</dt>
-            <dd className="text-right">{languages.length ? languages.join(', ') : 'add info'}</dd>
+            {/* <dd className="text-right">{languages.length ? languages.join(', ') : 'add info'}</dd> */}
           </div>
         </dl>
       </SectionCard>

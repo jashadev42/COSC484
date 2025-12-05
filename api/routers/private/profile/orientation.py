@@ -8,7 +8,7 @@ from middleware.auth import auth_user
 from schemas.preferences.orientation import UpdateSexualOrientationSchema
 from controllers.orientation import _get_profile_orientation, _get_all_orientation_options, _orientation_name_to_id, _update_profile_orientation
 
-router = APIRouter(prefix="/orientation", tags=["Profile: Orientation"])
+router = APIRouter(prefix="/me/orientation", tags=["Profile: Orientation"])
 
 @router.get("")
 def get_profile_orientation(uid: str = Depends(auth_user), db: Session = Depends(get_db)):

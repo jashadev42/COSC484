@@ -29,6 +29,35 @@ def _get_user_by_id(uid: str, db: Session):
     """)
     return db.execute(stmt, {"uid": uid}).mappings().first()
 
+def _set_user_online(uid: str, db: Session):
+    """Sets the user's online status to True and updates last seen timestamp."""
+    if not _user_exists(uid=uid, db=db):
+        # User not found; typically acceptable during socket connect if user is new,
+        # but we need to ensure the user is created elsewhere if they don't exist.
+        return None 
+    
+    stmt = text("""
+        UPDATE users.users 
+        SET is_online = TRUE, last_seen_at = now()
+        WHERE id = :uid
+        RETURNING id
+    """)
+    res = db.execute(stmt, {"uid": uid}).mappings().first()
+    return res
+
+def _set_user_offline(uid: str, db: Session):
+    """Sets the user's online status to False and updates last seen timestamp."""
+    if not _user_exists(uid=uid, db=db):
+        return None 
+
+    stmt = text("""
+        UPDATE users.users 
+        SET is_online = FALSE, last_seen_at = now()
+        WHERE id = :uid
+        RETURNING id
+    """)
+    res = db.execute(stmt, {"uid": uid}).mappings().first()
+    return res
 
 def _toggle_user_pause(uid: str, db: Session):
     """Private helper to toggle user's paused status"""

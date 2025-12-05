@@ -11,7 +11,7 @@ from schemas.photos import PhotoMetaSchema, PhotoSchema, UpdatePhotoMetaSchema
 from typing import Annotated, List
 
 
-router = APIRouter(prefix="/photos", tags=["Profile: Photos"])
+router = APIRouter(prefix="/me/photos", tags=["Profile: Photos"])
 
 @router.get("", response_model=List[PhotoMetaSchema])
 async def get_profile_photos(uid: Annotated[str, Depends(auth_user)], user_jwt: Annotated[str, Depends(get_user_jwt)], db: Annotated[Session, Depends(get_db)]):

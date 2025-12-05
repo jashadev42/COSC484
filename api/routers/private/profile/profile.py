@@ -13,14 +13,14 @@ from .interests import _update_profile_interests
 
 from controllers.profile import _profile_exists, _get_profile
 
-router = APIRouter()
+router = APIRouter(prefix='/me')
 
-@router.get("/")
+@router.get("")
 def get_my_profile(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_profile(uid=uid, db=db)
 
 """Used the first time after a user registers, to create their dating profile"""
-@router.post("/")
+@router.post("")
 def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     payload = jsonable_encoder(payload)
     if _profile_exists(uid=uid, db=db): 
@@ -123,7 +123,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
     )
 
 """Used to update a user's profile information"""
-@router.put("/")
+@router.put("")
 def update_profile(
     payload: UserProfileSchema,
     uid: str = Depends(auth_user),

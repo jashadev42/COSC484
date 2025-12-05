@@ -7,7 +7,7 @@ from middleware.auth import auth_user
 from schemas.preferences import UpdateGenderSchema
 from controllers.gender import _gender_name_to_id, _get_all_gender_options, _get_profile_gender, _update_profile_gender
 
-router = APIRouter(prefix="/gender", tags=["Profile: Gender"])
+router = APIRouter(prefix="/me/gender", tags=["Profile: Gender"])
 
 @router.get("")
 def get_profile_gender(uid: str = Depends(auth_user), db: Session = Depends(get_db)):

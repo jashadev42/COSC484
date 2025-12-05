@@ -21,7 +21,6 @@ def send_phone_otp(phone: str):
 """This will return a JWT access token that the frontend will use to provide the backend for CRUD operations that need user authorization"""
 @router.post("/otp")
 def verify_phone_otp(payload: PhoneOTPAnswerSchema, db: Annotated[Session, Depends(get_db)]):
-    print(payload)
     payload = jsonable_encoder(payload)
     res = verify_otp(phone=payload.get("phone"), code=payload.get("code")) # handles validity already
     user_data = jsonable_encoder(res).get("user")
