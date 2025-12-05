@@ -4,7 +4,7 @@ from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from models.preferences.interests import InterestsEnum
+from schemas.preferences.interests import InterestsEnum
 
 class SessionModeSchema(BaseModel):
     name: str

@@ -5,7 +5,7 @@ from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-from models.preferences import UserProfilePreferencesSchema
+from schemas.preferences import UserProfilePreferencesSchema
 
 class MatchmakingQueueSchema(BaseModel):
     uid: UUID

@@ -3,10 +3,10 @@ from sqlalchemy import text
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 
-from models.user import UserInfoSchema
-from models.session import SessionSchema, CreateSessionSchema
-from models.session.status import SessionStatusEnum
-from helpers.matchmaking import _user_in_queue, _leave_queue, _join_queue
+from schemas.user import UserInfoSchema
+from schemas.session import SessionSchema, CreateSessionSchema
+from schemas.session.status import SessionStatusEnum
+from controllers.matchmaking import _user_in_queue, _leave_queue, _join_queue
 
 def _user_in_session(uid: str, db: Session):
     exists = _get_active_session(uid=uid, db=db)

@@ -6,8 +6,8 @@ from fastapi.encoders import jsonable_encoder
 import json
 from datetime import datetime, timedelta
 
-from helpers.preferences import _get_user_prefs
-from helpers.profile import _get_profile
+from controllers.preferences import _get_user_prefs
+from controllers.profile import _get_profile
 
 def _get_queue(uid: str, db: Session):
     print("HERE")

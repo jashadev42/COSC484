@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from services.auth import auth_user
-from services.db import get_db
+from middleware.auth import auth_user
+from models.db import get_db
 
-from helpers.preferences import _update_user_prefs, _create_user_prefs, _get_user_prefs
-from models.preferences import UserProfilePreferencesSchema
+from controllers.preferences import _update_user_prefs, _create_user_prefs, _get_user_prefs
+from schemas.preferences import UserProfilePreferencesSchema
 
 router = APIRouter(prefix="/me/preferences", tags=["User: Preferences"])
 

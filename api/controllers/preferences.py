@@ -3,9 +3,9 @@ from sqlalchemy import text
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 
-from models.preferences import UserProfilePreferencesSchema
-from helpers.user import _user_exists
-from helpers.gender import _gender_name_to_id
+from schemas.preferences import UserProfilePreferencesSchema
+from controllers.user import _user_exists
+from controllers.gender import _gender_name_to_id
 
 from json import dumps
 

@@ -13,7 +13,7 @@ from routers.private.user import router as private_user_router
 from routers.private.session import router as private_matchmaking_router
 
 
-from services.db import get_db
+from models.db import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 

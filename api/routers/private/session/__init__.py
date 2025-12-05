@@ -7,3 +7,5 @@ router = APIRouter(prefix="/session", tags=["Session"])
 
 router.include_router(matchmaking_router)
 router.include_router(session_router)
+
+__all__=["router"]

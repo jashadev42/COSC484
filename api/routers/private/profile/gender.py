@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from services.db import get_db
-from services.auth import auth_user
+from models.db import get_db
+from middleware.auth import auth_user
 
-from models.preferences import UpdateGenderSchema
-from helpers.gender import _gender_name_to_id, _get_all_gender_options, _get_profile_gender, _update_profile_gender
+from schemas.preferences import UpdateGenderSchema
+from controllers.gender import _gender_name_to_id, _get_all_gender_options, _get_profile_gender, _update_profile_gender
 
 router = APIRouter(prefix="/gender", tags=["Profile: Gender"])
 

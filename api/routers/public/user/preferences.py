@@ -3,12 +3,12 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Annotated
-from helpers.profile import _profile_exists
-from services.auth import auth_user
-from services.db import get_db
+from controllers.profile import _profile_exists
+from middleware.auth import auth_user
+from models.db import get_db
 
-from helpers.preferences import _update_user_prefs, _create_user_prefs, _get_user_prefs
-from models.preferences import UserProfilePreferencesSchema
+from controllers.preferences import _update_user_prefs, _create_user_prefs, _get_user_prefs
+from schemas.preferences import UserProfilePreferencesSchema
 
 router = APIRouter(tags=["User: Preferences"])
 

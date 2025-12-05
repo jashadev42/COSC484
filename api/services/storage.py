@@ -1,11 +1,11 @@
 import io
-from .supabase_client import supabase_for_user as supabase
+from .supabase import supabase_for_user as supabase
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from storage3 import SyncStorageClient
 from fastapi import HTTPException
 
-from models.photos import PhotoMetaSchema, PhotoSchema, PhotoMetadataSchema
+from schemas.photos import PhotoMetaSchema, PhotoSchema, PhotoMetadataSchema
 
 import mimetypes
 import uuid

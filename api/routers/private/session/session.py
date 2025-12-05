@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from services.auth import auth_user
-from services.db import get_db
+from middleware.auth import auth_user
+from models.db import get_db
 
-from models.session import CreateSessionSchema
+from schemas.session import CreateSessionSchema
 
-from helpers.session import _get_active_session, _create_session, _join_session, _leave_session
+from controllers.session import _get_active_session, _create_session, _join_session, _leave_session
 router = APIRouter(prefix="/me")
 
 """Can return the active session of a user, regardless if they are host or guest"""

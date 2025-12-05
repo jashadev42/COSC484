@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from fastapi import HTTPException
 
-from helpers.profile import _profile_exists
+from controllers.profile import _profile_exists
 
 def _orientation_name_to_id(name: str, db: Session):
     id = db.execute(text("SELECT id FROM public.orientations WHERE name = :name LIMIT 1"), {"name": name}).scalar()
