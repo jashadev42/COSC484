@@ -21,10 +21,10 @@ export default function SignUpLanding() {
           Sign up to continue
         </h1>
 
-        {/* Primary CTA */}
+        {/* Button -> phone auth form */}
         <button
           onClick={() => navigate("/auth/phone")}
-          className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold text-black transition-colors shadow-md hover:bg-neutral-200"
+          className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold text-black transition-colors shadow-md"
         >
           Use phone number
         </button>
