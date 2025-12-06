@@ -1,3 +1,8 @@
+// src/App.jsx
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext.jsx";
+import AppRoutes from "./AppRoutes.jsx";
 import { useState } from 'react'
 import TitleBarComponent from '@components/TitleBarComponent'
 import PhoneAuthFormComponent from '@components/PhoneAuthFormComponent'
