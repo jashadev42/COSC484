@@ -2,25 +2,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from services.db import get_db
-from services.auth import auth_user
+from models.db import get_db
+from middleware.auth import auth_user
 
-from models.profile import UserProfileSchema
+from schemas.profile import UserProfileSchema
 
 from .gender import _gender_name_to_id
 from .orientation import _orientation_name_to_id
 from .interests import _update_profile_interests
 
-from helpers.profile import _profile_exists, _get_profile
+from controllers.profile import _profile_exists, _get_profile
 
-router = APIRouter()
+router = APIRouter(prefix='/me')
 
-@router.get("/")
+@router.get("")
 def get_my_profile(uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     return _get_profile(uid=uid, db=db)
 
 """Used the first time after a user registers, to create their dating profile"""
-@router.post("/")
+@router.post("")
 def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db: Session = Depends(get_db)):
     payload = jsonable_encoder(payload)
     if _profile_exists(uid=uid, db=db): 
@@ -123,7 +123,7 @@ def create_profile(payload: UserProfileSchema, uid: str = Depends(auth_user), db
     )
 
 """Used to update a user's profile information"""
-@router.put("/")
+@router.put("")
 def update_profile(
     payload: UserProfileSchema,
     uid: str = Depends(auth_user),

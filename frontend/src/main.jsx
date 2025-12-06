@@ -1,11 +1,22 @@
 // src/main.jsx
-import React from "react";
-import ReactDOM from "react-dom/client";
+import React, { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import "./index.css";
 import App from "./App.jsx";
-import "./index.css"; // your Tailwind entry
+import { AuthProvider } from "@contexts/AuthContext.jsx";
+import { SocketProvider } from './contexts/SocketContext.jsx'
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const container = document.getElementById("root");
+
+createRoot(container).render(
+  <StrictMode>
+    <BrowserRouter>
+      <AuthProvider> {/* Used for the AuthContext */}
+        <SocketProvider>  {/* Used for the SocketContext */}
+          <App /> 
+        </SocketProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </StrictMode>,
+)

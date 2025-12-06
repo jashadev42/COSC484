@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from services.auth import auth_user
-from services.db import get_db
+from middleware.auth import auth_user
+from models.db import get_db
 
-from models.photos import PhotoMetaSchema
+from schemas.photos import PhotoMetaSchema
 from typing import Annotated, List
 
 import asyncio
-from helpers.profile import _profile_exists
-from services.supabase_client import supabase_for_service
+from controllers.profile import _profile_exists
+from services.supabase import supabase_for_service
 from services.storage import get_user_photos
 
 router = APIRouter(tags=["Profile: Photos"])

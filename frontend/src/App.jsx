@@ -5,11 +5,16 @@ import { AuthProvider } from "./contexts/AuthContext.jsx";
 import AppRoutes from "./AppRoutes.jsx";
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
-  );
+    return (
+        <section className='flex flex-col w-full h-full'>
+            <header>
+                <TitleBarComponent/>
+            </header>
+            <main className='flex w-full justify-center '>
+                <PhoneAuthFormComponent/>
+            </main>
+            <footer>
+            </footer>
+        </section>
+    )
 }

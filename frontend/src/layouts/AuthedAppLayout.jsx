@@ -1,15 +1,18 @@
-// src/layouts/AuthedAppLayout.jsx
 import React from "react";
-import { Outlet } from "react-router-dom";
-import BottomNavBar from "../components/nav/BottomNavBar.jsx";
-import TitleBarComponent from "../TitleBarComponent.jsx";
+import { NavLink, Outlet } from "react-router-dom";
+import {
+  SparkIcon,
+  ChatIcon,
+  ProfileIcon,
+  SettingsIcon,
+} from "../auth/components/NavIcons.jsx";
 
 export default function AuthedAppLayout() {
   return (
-    <div className="min-h-screen flex flex-col text-white">
-      {/* Your title bar at the top */}
-      <header className="border-b border-neutral-900">
-        <TitleBarComponent />
+    <div className="min-h-screen w-full flex flex-col text-white">
+      {/* Top bar (logo) */}
+      <header className="h-14 flex items-center px-4 border-b border-neutral-800">
+        <img src="/spark.svg" alt="Spark logo" className="h-16 w-16" />
       </header>
 
       {/* Main content */}
@@ -18,7 +21,38 @@ export default function AuthedAppLayout() {
       </main>
 
       {/* Bottom nav */}
-      <BottomNavBar />
+      <div className="border-t border-neutral-800 bg-black"></div>
+      <nav className="h-14 border-top border-neutral-800 flex items-center justify-around">
+        <BottomNavLink to="/spark">
+          <SparkIcon />
+        </BottomNavLink>
+        <BottomNavLink to="/chats">
+          <ChatIcon />
+        </BottomNavLink>
+        <BottomNavLink to="/profile">
+          <ProfileIcon />
+        </BottomNavLink>
+        <BottomNavLink to="/settings">
+          <SettingsIcon />
+        </BottomNavLink>
+      </nav>
     </div>
+  );
+}
+
+function BottomNavLink({ to, label, children }) {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        [
+          "flex flex-col items-center justify-center text-xs gap-0.5",
+          isActive ? "text-amber-400" : "text-neutral-400",
+        ].join(" ")
+      }
+    >
+      {children}
+      <span>{label}</span>
+    </NavLink>
   );
 }

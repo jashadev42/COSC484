@@ -1,11 +1,11 @@
 import io
-from .supabase_client import supabase_for_user as supabase
+from .supabase import supabase_for_user as supabase
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from storage3 import SyncStorageClient
 from fastapi import HTTPException
 
-from models.photos import PhotoMetaSchema, PhotoSchema, PhotoMetadataSchema
+from schemas.photos import PhotoMetaSchema, PhotoSchema, PhotoMetadataSchema
 
 import mimetypes
 import uuid
@@ -48,16 +48,13 @@ def get_user_photos(
         ORDER BY is_primary DESC, created_at DESC
     """)
     rows = db.execute(stmt, {"uid": uid}).mappings().all()
-    print(rows)
     if not rows:
         return []
 
     bucket = storage.from_(BUCKET)
     paths = [r["path"] for r in rows]
-    print(paths)
 
     signed_resp = bucket.create_signed_urls(paths, ttl_seconds)
-    print("SRSP:" , signed_resp)
 
     if isinstance(signed_resp, dict):
         data = signed_resp.get("data") or []
