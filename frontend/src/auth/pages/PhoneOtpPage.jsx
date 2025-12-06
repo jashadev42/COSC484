@@ -17,7 +17,7 @@ export default function PhoneOtpPage() {
   return (
     <section className="flex flex-col w-full min-h-screen text-white">
       <header className="p-4">
-        <TitleBarComponent />
+        
       </header>
       <main className="flex w-full justify-center p-4">
         <PhoneAuthFormComponent />
