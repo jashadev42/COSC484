@@ -1,94 +1,91 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@contexts/AuthContext";
 
 export default function ChatListPage() {
   const { fetchWithAuth } = useAuth();
+  const navigate = useNavigate();
 
   const [chats, setChats] = useState([]);
+  const [photoMap, setPhotoMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const devMockEnabled = true; // TURN OFF FOR PRODUCTION
-
-useEffect(() => {
-  if (devMockEnabled) {
-    setChats([
-      {
-        session_id: "abc123",
-        user: {
-          first_name: "Alex",
-          age: 22,
-          avatar_color: "#f97316"
-        },
-        last_message: {
-          text: "Had fun talking last night 😊",
-          timestamp: "2025-11-24T12:00:00Z"
-        }
-      },
-      {
-        session_id: "xyz999",
-        user: {
-          first_name: "Jordan",
-          age: 21,
-          avatar_color: "#22c55e"
-        },
-        last_message: {
-          text: "Let’s grab coffee sometime?",
-          timestamp: "2025-11-23T10:15:00Z"
-        }
-      }
-    ]);
-    setLoading(false);
-    return;
-  }
-}, []);
-
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadChats() {
       setLoading(true);
+      setError("");
 
       try {
-        const res = await fetchWithAuth(
-          "/matchmaking/me/session/chats"
-        );
-
+        const res = await fetchWithAuth("/user/me/chats");
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.message || "Failed to load chats");
         }
 
-        const data = await res.json().catch(() => []);
-
+        const data = await res.json();
         if (!cancelled) setChats(Array.isArray(data) ? data : []);
-      } catch (err) {
-        if (!cancelled) setError(err.message);
+      } catch (e) {
+        if (!cancelled) setError(e.message || "Failed to load chats");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     loadChats();
-    return () => { cancelled = true };
+    return () => {
+      cancelled = true;
+    };
   }, [fetchWithAuth]);
 
-  // Convert backend → what the UI expects
+  const loadPhotoForUser = useCallback(
+    async (uid) => {
+      if (!uid || photoMap[uid]) return;
+      try {
+        const res = await fetchWithAuth(`/profile/${uid}/photos`);
+        if (!res.ok) return;
+        const photos = await res.json();
+        const first =
+          Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
+
+        setPhotoMap((prev) => ({
+          ...prev,
+          [uid]: first,
+        }));
+      } catch {}
+    },
+    [fetchWithAuth, photoMap]
+  );
+
+  useEffect(() => {
+    chats.forEach((c) => {
+      if (c.other_user_uid) loadPhotoForUser(c.other_user_uid);
+    });
+  }, [chats, loadPhotoForUser]);
+
   const viewChats = useMemo(() => {
-    return chats.map((c) => ({
-      id: c.session_id,
-      name: c.user?.first_name ?? "Unknown",
-      age: c.user?.age ?? "",
-      matchedAt: c.last_message?.timestamp?.split("T")[0] ?? "",
-      lastMessage: c.last_message?.text ?? "",
-      avatarColor: c.user?.avatar_color ?? "#888",
-    }));
-  }, [chats]);
+    return chats.map((c) => {
+      const u = c.other_user || {};
+      const photoMeta = c.other_user_uid ? photoMap[c.other_user_uid] : null;
+
+      return {
+        id: c.id,
+        otherUserUid: c.other_user_uid,
+        name: u.fname || u.first_name || "Unknown",
+        age: u.age || "",
+        matchedAt: c.last_message_at
+          ? new Date(c.last_message_at).toLocaleDateString()
+          : "",
+        lastMessage: c.last_message?.content || "",
+        avatarUrl: photoMeta?.url || null,
+      };
+    });
+  }, [chats, photoMap]);
 
   function handleOpenChat(chat) {
-    console.log("Open chat", chat);
-    alert(`Open chat with ${chat.name} (TODO)`);
+    navigate(`/chats/${chat.id}`);
   }
 
   return (
@@ -98,7 +95,7 @@ useEffect(() => {
       {loading && <p className="text-neutral-400">Loading…</p>}
       {error && <p className="text-red-400">{error}</p>}
 
-      {!loading && viewChats.length === 0 && (
+      {!loading && viewChats.length === 0 && !error && (
         <p className="text-sm text-center text-neutral-400">
           Go find your spark.
         </p>
@@ -112,17 +109,23 @@ useEffect(() => {
                 onClick={() => handleOpenChat(chat)}
                 className="w-full flex items-center gap-3 rounded-2xl border-t border-neutral-800 p-2 text-left transition"
               >
-                <div
-                  className="h-11 w-11 rounded-full flex items-center justify-center text-base font-semibold"
-                  style={{ backgroundColor: chat.avatarColor }}
-                >
-                  {chat.name[0]}
-                </div>
+                {chat.avatarUrl ? (
+                  <img
+                    src={chat.avatarUrl}
+                    alt={chat.name}
+                    className="h-11 w-11 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-11 w-11 rounded-full flex items-center justify-center text-base font-semibold bg-neutral-700">
+                    {chat.name[0]}
+                  </div>
+                )}
 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-white">
-                      {chat.name}{chat.age ? `, ${chat.age}` : ""}
+                      {chat.name}
+                      {chat.age ? `, ${chat.age}` : ""}
                     </p>
                     <p className="text-xs text-neutral-400">
                       Matched {chat.matchedAt}
