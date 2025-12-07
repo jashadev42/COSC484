@@ -1,10 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 
 export default function PhoneAuthFormComponent() {
     const { loading, error, setError, otpSent, session, user, requestOtp, verifyOtp, signOut } = useAuth();
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (session?.access_token) {
+            navigate("/app", { replace: true });
+        }
+    }, [session?.access_token, navigate]);
 
     const onGetOtp = useCallback(async (e) => {
         e.preventDefault();
