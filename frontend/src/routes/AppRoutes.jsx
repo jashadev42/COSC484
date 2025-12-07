@@ -1,32 +1,35 @@
+// frontend/src/routes/AppRoutes.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import SignUpLanding from "../auth/pages/SignUpLanding";
-import PhoneAuthPage from "../auth/pages/PhoneOtpPage";
-import ProfileSetupPage from "../profile/pages/ProfileSetupPage";
-import ProfilePage from "../profile/pages/ProfilePage";
+import SignUpLanding from "../auth/pages/SignUpLanding.jsx";
+import PhoneOtpPage from "../auth/pages/PhoneOtpPage.jsx";
 
-import AuthedAppLayout from "../layouts/AuthedAppLayout";
-import SparkViewPage from "../profile/pages/SparkViewPage";
-import ChatListPage from "../profile/pages/ChatListPage";
-import SettingsPage from "../profile/pages/SettingsPage";
+import ProfileSetupPage from "../pages/ProfileSetupPage.jsx";
+import DevOnboardingPreview from "../pages/DevOnboardingPreview.jsx";
+import SparkViewPage from "../pages/SparkViewPage.jsx";
+import ChatListPage from "../pages/ChatListPage.jsx";
+import ProfilePage from "../pages/ProfilePage.jsx";
+import SettingsPage from "../pages/SettingsPage.jsx";
 
-// Dev only pages
-import DevOnboardingPreview from "../profile/pages/DevOnboardingPreview";
+import MatchmakingPage from "../pages/MatchmakingPage.jsx";   // ✅ correct
+import ProfileScreen from "../pages/ProfileScreen.jsx";       // ✅ correct
+import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
 
 export default function AppRoutes() {
   return (
     <Routes>
       {/* Public / auth flow */}
       <Route path="/" element={<SignUpLanding />} />
-      <Route path="/auth/phone" element={<PhoneAuthPage />} />
+      <Route path="/auth/phone" element={<PhoneOtpPage />} />
       <Route path="/onboarding" element={<ProfileSetupPage />} />
 
       {/* Authed app shell with bottom nav */}
       <Route element={<AuthedAppLayout />}>
         <Route path="/spark" element={<SparkViewPage />} />
+        <Route path="/matchmaking" element={<MatchmakingPage />} />
         <Route path="/chats" element={<ChatListPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
 

@@ -1,29 +1,12 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext.jsx";
-import AppRoutes from "./AppRoutes.jsx";
-import { useState } from 'react'
-import TitleBarComponent from '@components/TitleBarComponent'
-import PhoneAuthFormComponent from '@components/PhoneAuthFormComponent'
-import './index.css'
-import { useAuth } from '@contexts/AuthContext'
-import { Matchmaking } from './components/Matchmaking'
+import AppRoutes from "./routes/AppRoutes";
+import "./index.css";
 
 export default function App() {
-    const {isAuthenticated} = useAuth();
-
-    return (
-        <section className='flex flex-col w-full h-full'>
-            <header>
-                <TitleBarComponent/>
-            </header>
-            {isAuthenticated && <Matchmaking/>}
-            <main className='flex w-full justify-center '>
-                <PhoneAuthFormComponent/>
-            </main>
-            <footer>
-            </footer>
-        </section>
-    )
+  return (
+    <div className="w-full min-h-screen">
+      <AppRoutes />
+    </div>
+  );
 }
