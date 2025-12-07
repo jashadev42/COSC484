@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   define: {
-    '__API_URL__': JSON.stringify("https://spark-dating-api.vercel.app")
+    '__API_URL__': JSON.stringify("https://spark-dating-api-production.up.railway.app")
   },
   resolve: {
     alias: {
