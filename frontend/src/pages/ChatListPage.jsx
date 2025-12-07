@@ -1,4 +1,3 @@
-// src/pages/chat/ChatListPage.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSocket } from "@contexts/SocketContext.jsx";
 
@@ -64,11 +63,10 @@ export default function ChatListPage() {
     };
   }, [subscribe, unsubscribe, appendLog, activeSessionId]);
 
-  const canSendMessage = useMemo(() => Boolean(isConnected && activeSessionId && messageInput.trim()), [
-    isConnected,
-    activeSessionId,
-    messageInput,
-  ]);
+  const canSendMessage = useMemo(
+    () => Boolean(isConnected && activeSessionId && messageInput.trim()),
+    [isConnected, activeSessionId, messageInput]
+  );
 
   const joinSession = useCallback(() => {
     if (!sessionIdInput.trim()) {
@@ -133,10 +131,7 @@ export default function ChatListPage() {
           </div>
         </div>
         <p className="text-xs text-neutral-500">
-          Connected session:{" "}
-          <span className="font-mono">
-            {activeSessionId ?? "—"}
-          </span>
+          Connected session: <span className="font-mono">{activeSessionId ?? "—"}</span>
         </p>
       </section>
 
