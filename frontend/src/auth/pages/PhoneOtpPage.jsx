@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import TitleBarComponent from "../components/TitleBarComponent";
-import PhoneAuthFormComponent from "../components/PhoneAuthFormComponent";
+import TitleBarComponent from "../../components/TitleBarComponent";
+import PhoneAuthFormComponent from "../../components/PhoneAuthFormComponent";
 import { useAuth } from "@contexts/AuthContext.jsx";
 
 export default function PhoneOtpPage() {
