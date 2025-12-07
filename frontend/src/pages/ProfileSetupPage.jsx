@@ -1,281 +1,167 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAuth } from "@contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@contexts/AuthContext.jsx";
 
 export default function ProfileSetupPage() {
+  const { fetchWithAuth } = useAuth();
   const navigate = useNavigate();
-  const { fetchWithAuth, isAuthenticated } = useAuth();
 
-  // User fields (/user/me)
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
   const [birthdate, setBirthdate] = useState("");
-
-  // Profile fields (/profile/me)
   const [gender, setGender] = useState("");
   const [orientation, setOrientation] = useState("");
 
-  const [genderOptions, setGenderOptions] = useState([]);
-  const [orientationOptions, setOrientationOptions] = useState([]);
-
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // If not logged in, send back to phone auth
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/auth/phone");
-    }
-  }, [isAuthenticated, navigate]);
-
-  // Load genders, orientations, and existing user/profile info
-  useEffect(() => {
-    async function loadData() {
-      if (!isAuthenticated) return;
-
-      setLoading(true);
-      
-      // Store loaded data to check for completeness before setting state
-      let loadedFirstName = "";
-      let loadedLastName = "";
-      let loadedBirthdate = "";
-      let loadedGender = "";
-      let loadedOrientation = "";
-
-      try {
-        // Load User Info (/user/me)
-        const resUser = await fetchWithAuth("/user/me");
-        if (resUser.ok) {
-          const data = await resUser.json();
-          if (data.first_name) {
-            loadedFirstName = data.first_name;
-            setFirstName(data.first_name); 
-          }
-          if (data.last_name) {
-            loadedLastName = data.last_name;
-            setLastName(data.last_name);
-          }
-          // Ensure format is YYYY-MM-DD for input[type="date"]
-          if (data.birthdate) {
-            loadedBirthdate = data.birthdate.split('T')[0];
-            setBirthdate(loadedBirthdate);
-          } 
-        }
-
-        // Load Profile Info (/profile/me)
-        const resProfile = await fetchWithAuth("/profile/me");
-        if (resProfile.ok) {
-            const data = await resProfile.json();
-            if (data.gender) {
-                loadedGender = data.gender;
-                setGender(data.gender);
-            }
-            if (data.orientation) {
-                loadedOrientation = data.orientation;
-                setOrientation(data.orientation);
-            }
-        }
-
-        // CHECK FOR COMPLETENESS AND REDIRECT 
-        const allFieldsComplete = 
-          loadedFirstName && 
-          loadedLastName && 
-          loadedBirthdate && 
-          loadedGender && 
-          loadedOrientation;
-
-        if (allFieldsComplete) {
-            navigate("/profile", { replace: true });
-            return; // Stop execution, redirecting
-        }
-
-        // Load Gender Options (Only necessary if we haven't redirected)
-        const resGender = await fetchWithAuth("/profile/genders");
-        if (resGender.ok) {
-          const genderData = await resGender.json();
-          setGenderOptions(genderData);
-        }
-
-        // Load Orientation Options (Only necessary if we haven't redirected)
-        const resOrient = await fetchWithAuth("/profile/orientations");
-        if (resOrient.ok) {
-          const orientData = await resOrient.json();
-          setOrientationOptions(orientData);
-        }
-      } catch (err) {
-        console.error("Error loading onboarding data:", err);
-        setError("Failed to load your info. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, [fetchWithAuth, isAuthenticated, navigate]);
-
   async function handleSubmit(e) {
     e.preventDefault();
+    setSaving(true);
     setError("");
 
-    if (!firstName || !lastName || !birthdate || !gender || !orientation) {
-      setError("Please fill out all fields.");
-      return;
-    }
-
-    setSaving(true);
     try {
-      // --- Update User Info (/user/me) ---
-      const userRes = await fetchWithAuth("/user/me", {
+      // 1) Save basic user info
+      const birthISO = new Date(birthdate).toISOString();
+
+      let res = await fetchWithAuth("/user/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fname: firstName.trim(), 
-          lname: lastName.trim(),
-          birthdate: birthdate, 
+          first_name: fname,
+          last_name: lname,
+          birthdate: birthISO,
         }),
       });
 
-      if (!userRes.ok) {
-        const data = await userRes.json().catch(() => ({}));
-        setError(data.message || "Failed to save your name/birthdate.");
-        setSaving(false); 
-        return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        console.error("Error /user/me:", data || res.statusText);
+        throw new Error("Failed to save basic info");
       }
-      
-      // --- Update Profile Info (/profile/me) ---
-      const profileRes = await fetchWithAuth("/profile/me", {
+
+      // 2) Create / update profile with ALL required fields
+      res = await fetchWithAuth("/profile/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          drug_use: false,
+          weed_use: false,
+          show_precise_location: false,
           gender,
           orientation,
+          bio: "",
+          location: "",
+          location_label: "",
+          school: "",
+          occupation: "",
+          pronouns: "any",    
+          relationship_goal: "casual dating",
+          personality_type: "ambivert",  
+          love_language: "quality time",
+          attachment_style: "secure",
+          political_view: "moderate",
+          zodiac_sign: "aries",
+          religion: "other",   
+          diet: "omnivore",           
+          exercise_frequency: "sometimes",
+          sleep_schedule: "flexible", 
+
+          interests: [],
+          languages_spoken: [],
+          pets: [],
+
+          smoke_frequency: null,
+          drink_frequency: null,
         }),
       });
 
-      if (!profileRes.ok) {
-        const data = await profileRes.json().catch(() => ({}));
-        setError(data.message || "Failed to save your gender/orientation.");
-        setSaving(false);
-        return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        console.error("Error /profile/me:", data || res.statusText);
+        throw new Error("Failed to initialize profile");
       }
 
+      // 3) On success, go into the app
       navigate("/profile");
     } catch (err) {
       console.error(err);
-      setError("Something went wrong.");
+      setError(err.message || "Failed to complete onboarding");
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center p-6">
-        <p>Loading…</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6">
-      <div className="w-full max-w-md space-y-6">
-        {/* Back */}
-        <button
-          onClick={() => navigate("/auth/phone")}
-          className="text-sm text-neutral-500 hover:text-neutral-800"
-        >
-          ← Back
-        </button>
+    <div className="min-h-screen flex items-center justify-center text-white">
+      <div className="p-6 text-white max-w-md w-full">
+        <h1 className="text-2xl font-bold mb-4">Welcome to Spark ✨</h1>
 
-        <h1 className="text-3xl font-semibold mb-2">Welcome to Spark ✨</h1>
-        <p className="text-neutral-600">
-          Tell us a bit about you.
-        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            className="w-full p-3 rounded bg-neutral-800"
+            placeholder="First name"
+            value={fname}
+            onChange={(e) => setFname(e.target.value)}
+            required
+          />
 
-        <form onSubmit={handleSubmit} className="space-y-4" onChange={() => setError("")}>
-          {/* First + Last */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">First name</label>
-            <input
-              type="text"
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              disabled={saving}
-            />
-          </div>
+          <input
+            className="w-full p-3 rounded bg-neutral-800"
+            placeholder="Last name"
+            value={lname}
+            onChange={(e) => setLname(e.target.value)}
+            required
+          />
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Last name</label>
-            <input
-              type="text"
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              disabled={saving}
-            />
-          </div>
+          <input
+            type="date"
+            className="w-full p-3 rounded bg-neutral-800"
+            value={birthdate}
+            onChange={(e) => setBirthdate(e.target.value)}
+            required
+          />
 
-          {/* Birthdate */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Birthdate</label>
-            <input
-              type="date"
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
-              disabled={saving}
-            />
-          </div>
+          <select
+            className="w-full p-3 rounded bg-neutral-800"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            required
+          >
+            <option value="">Select gender</option>
+            <option value="male">male</option>
+            <option value="female">female</option>
+            <option value="non-binary">non-binary</option>
+            <option value="genderqueer">genderqueer</option>
+            <option value="genderfluid">genderfluid</option>
+          </select>
 
-          {/* Gender selection */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Gender</label>
-            <select
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2 bg-white"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              disabled={saving}
-            >
-              <option value="">Select your gender</option>
-              {genderOptions.map((g) => (
-                <option key={g.id ?? g.name} value={g.name}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="w-full p-3 rounded bg-neutral-800"
+            value={orientation}
+            onChange={(e) => setOrientation(e.target.value)}
+            required
+          >
+            <option value="">Select orientation</option>
+            <option value="straight">straight</option>
+            <option value="gay">gay</option>
+            <option value="lesbian">lesbian</option>
+            <option value="bisexual">bisexual</option>
+            <option value="pansexual">pansexual</option>
+            <option value="asexual">asexual</option>
+          </select>
 
-          {/* Orientation selection */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Orientation</label>
-            <select
-              className="w-full rounded-xl border border-neutral-300 px-3 py-2 bg-white"
-              value={orientation}
-              onChange={(e) => setOrientation(e.target.value)}
-              disabled={saving}
-            >
-              <option value="">Select your orientation</option>
-              {orientationOptions.map((o) => (
-                <option key={o.id ?? o.name} value={o.name}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-red-400">{error}</p>}
 
           <button
             type="submit"
-            className="w-full rounded-2xl px-6 py-3 bg-black text-white font-semibold"
             disabled={saving}
+            className="w-full p-3 rounded bg-white text-black font-bold"
           >
-            {saving ? "Saving…" : "Continue"}
+            {saving ? "Saving..." : "Continue"}
           </button>
         </form>
       </div>
     </div>
   );
-};
+}
