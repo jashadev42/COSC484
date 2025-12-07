@@ -6,52 +6,98 @@ export default function ProfileSetupPage() {
   const navigate = useNavigate();
   const { fetchWithAuth, isAuthenticated } = useAuth();
 
-  const [firstName, setFirstName]     = useState("");
-  const [lastName, setLastName]       = useState("");
-  const [birthdate, setBirthdate]     = useState("");
-  const [gender, setGender]           = useState("");
+  // User fields (/user/me)
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+
+  // Profile fields (/profile/me)
+  const [gender, setGender] = useState("");
   const [orientation, setOrientation] = useState("");
 
   const [genderOptions, setGenderOptions] = useState([]);
   const [orientationOptions, setOrientationOptions] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [error, setError]     = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  // If not logged in → send back to phone auth
+  // If not logged in, send back to phone auth
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/auth/phone");
     }
   }, [isAuthenticated, navigate]);
 
-  // Load genders, orientations, and existing user info
+  // Load genders, orientations, and existing user/profile info
   useEffect(() => {
     async function loadData() {
       if (!isAuthenticated) return;
 
       setLoading(true);
+      
+      // Store loaded data to check for completeness before setting state
+      let loadedFirstName = "";
+      let loadedLastName = "";
+      let loadedBirthdate = "";
+      let loadedGender = "";
+      let loadedOrientation = "";
+
       try {
-        // Load user info
+        // Load User Info (/user/me)
         const resUser = await fetchWithAuth("/user/me");
         if (resUser.ok) {
           const data = await resUser.json();
-          if (data.first_name) setFirstName(data.first_name);
-          if (data.last_name)  setLastName(data.last_name);
-          if (data.birthdate)  setBirthdate(data.birthdate);
-          if (data.gender)     setGender(data.gender);
-          if (data.orientation) setOrientation(data.orientation);
+          if (data.first_name) {
+            loadedFirstName = data.first_name;
+            setFirstName(data.first_name); 
+          }
+          if (data.last_name) {
+            loadedLastName = data.last_name;
+            setLastName(data.last_name);
+          }
+          // Ensure format is YYYY-MM-DD for input[type="date"]
+          if (data.birthdate) {
+            loadedBirthdate = data.birthdate.split('T')[0];
+            setBirthdate(loadedBirthdate);
+          } 
         }
 
-        // Load gender options
+        // Load Profile Info (/profile/me)
+        const resProfile = await fetchWithAuth("/profile/me");
+        if (resProfile.ok) {
+            const data = await resProfile.json();
+            if (data.gender) {
+                loadedGender = data.gender;
+                setGender(data.gender);
+            }
+            if (data.orientation) {
+                loadedOrientation = data.orientation;
+                setOrientation(data.orientation);
+            }
+        }
+
+        // CHECK FOR COMPLETENESS AND REDIRECT 
+        const allFieldsComplete = 
+          loadedFirstName && 
+          loadedLastName && 
+          loadedBirthdate && 
+          loadedGender && 
+          loadedOrientation;
+
+        if (allFieldsComplete) {
+            navigate("/profile", { replace: true });
+            return; // Stop execution, redirecting
+        }
+
+        // Load Gender Options (Only necessary if we haven't redirected)
         const resGender = await fetchWithAuth("/profile/genders");
         if (resGender.ok) {
           const genderData = await resGender.json();
           setGenderOptions(genderData);
         }
 
-        // Load orientation options
+        // Load Orientation Options (Only necessary if we haven't redirected)
         const resOrient = await fetchWithAuth("/profile/orientations");
         if (resOrient.ok) {
           const orientData = await resOrient.json();
@@ -66,7 +112,7 @@ export default function ProfileSetupPage() {
     }
 
     loadData();
-  }, [fetchWithAuth, isAuthenticated]);
+  }, [fetchWithAuth, isAuthenticated, navigate]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -79,21 +125,38 @@ export default function ProfileSetupPage() {
 
     setSaving(true);
     try {
-      const res = await fetchWithAuth("/user/me", {
+      // --- Update User Info (/user/me) ---
+      const userRes = await fetchWithAuth("/user/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          first_name: firstName.trim(),
-          last_name:  lastName.trim(),
-          birthdate,
+          fname: firstName.trim(), 
+          lname: lastName.trim(),
+          birthdate: birthdate, 
+        }),
+      });
+
+      if (!userRes.ok) {
+        const data = await userRes.json().catch(() => ({}));
+        setError(data.message || "Failed to save your name/birthdate.");
+        setSaving(false); 
+        return;
+      }
+      
+      // --- Update Profile Info (/profile/me) ---
+      const profileRes = await fetchWithAuth("/profile/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           gender,
           orientation,
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.message || "Failed to save your profile.");
+      if (!profileRes.ok) {
+        const data = await profileRes.json().catch(() => ({}));
+        setError(data.message || "Failed to save your gender/orientation.");
+        setSaving(false);
         return;
       }
 
@@ -166,7 +229,7 @@ export default function ProfileSetupPage() {
             />
           </div>
 
-          {/* Gender SELECT (dynamic) */}
+          {/* Gender selection */}
           <div className="space-y-2">
             <label className="block text-sm font-medium">Gender</label>
             <select
@@ -184,7 +247,7 @@ export default function ProfileSetupPage() {
             </select>
           </div>
 
-          {/* Orientation SELECT (dynamic) */}
+          {/* Orientation selection */}
           <div className="space-y-2">
             <label className="block text-sm font-medium">Orientation</label>
             <select
@@ -215,4 +278,4 @@ export default function ProfileSetupPage() {
       </div>
     </div>
   );
-}
+};

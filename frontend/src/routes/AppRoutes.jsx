@@ -12,8 +12,8 @@ import ChatListPage from "../pages/ChatListPage.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import SettingsPage from "../pages/SettingsPage.jsx";
 
-import MatchmakingPage from "../pages/MatchmakingPage.jsx";   // ✅ correct
-import ProfileScreen from "../pages/ProfileScreen.jsx";       // ✅ correct
+import MatchmakingPage from "../pages/MatchmakingPage.jsx";
+import ProfileScreen from "../pages/ProfileScreen.jsx";
 import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
 
 export default function AppRoutes() {
