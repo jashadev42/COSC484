@@ -6,23 +6,18 @@ import {
   ProfileIcon,
   SettingsIcon,
 } from "../auth/components/NavIcons.jsx";
+import TitleBarComponent from '@components/TitleBarComponent.jsx'
 
 export default function AuthedAppLayout() {
   return (
-    <div className="min-h-screen w-full flex flex-col text-white">
-      {/* Top bar (logo) */}
-      <header className="h-14 flex items-center px-4 border-b border-neutral-800">
-        <img src="/spark.svg" alt="Spark logo" className="h-16 w-16" />
-      </header>
+    <div className="h-full w-full flex flex-col overflow-hidden text-white pt-8 pb-4">
+      <TitleBarComponent />
 
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto px-4">
         <Outlet />
       </main>
 
-      {/* Bottom nav */}
-      <div className="border-t border-neutral-800 bg-black"></div>
-      <nav className="h-14 border-top border-neutral-800 flex items-center justify-around">
+      <nav className="h-14 mt-2 border-t border-neutral-800 flex items-center justify-around flex-shrink-0">
         <BottomNavLink to="/spark">
           <SparkIcon />
         </BottomNavLink>

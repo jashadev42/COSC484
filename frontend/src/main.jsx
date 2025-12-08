@@ -15,7 +15,7 @@ createRoot(container).render(
     <BrowserRouter>
       <AuthProvider>
         <SocketProvider>
-          <App />
+            <App />
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -509,7 +509,7 @@ export default function PreferencesPage() {
             className="flex-1 rounded-xl border border-neutral-600 px-4 py-3 text-sm text-neutral-200"
             disabled={saving}
           >
-            Cancel
+            <span className="text-neutral-200">Cancel</span>
           </button>
           <button
             type="submit"

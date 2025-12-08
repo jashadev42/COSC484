@@ -39,13 +39,13 @@ function calculateAge(dateString) {
 
 const StatBadge = ({ icon, label }) => (
   <div className="flex items-center gap-1 text-xs uppercase tracking-[0.35em] text-[#C7C4A7]">
-    <span className="text-primary">{icon}</span>
+    {/* <span className="text-primary text-xl">{icon}</span> */}
     <span className="tracking-[0.25em]">{label}</span>
   </div>
 )
 
 const SectionCard = ({ title, children }) => (
-  <div className="space-y-2 rounded-3xl bg-[#272323] p-4 shadow-[0_25px_55px_rgba(0,0,0,0.45)]">
+  <div className="space-y-2 rounded-3xl bg-[#272323] p-4 ">
     <p className="text-xs uppercase tracking-[0.4em] text-[#C7C4A7]">{title}</p>
     <div className="text-lg leading-relaxed text-white">{children}</div>
   </div>
@@ -55,7 +55,7 @@ const FloatingButton = ({ icon, onClick, label }) => (
   <button
     aria-label={label}
     onClick={onClick}
-    className="absolute -right-3 -bottom-3 grid h-12 w-12 place-content-center rounded-full bg-primary text-2xl text-darkest shadow-lg hover:opacity-80"
+    className="absolute -right-3 -bottom-3 grid h-12 w-12 place-content-center rounded-full bg-primary text-2xl text-darkest hover:opacity-80"
   >
     {icon}
   </button>
@@ -64,22 +64,28 @@ const FloatingButton = ({ icon, onClick, label }) => (
 function ProfileView({
   userInfo,
   profile,
-  gender,
-  orientation,
+  preferences,
   interests,
   photoUrl,
   onEdit,
 }) {
-  const languages = profile?.languages_spoken ?? []
+  const languages = Array.isArray(profile?.languages_spoken)
+    ? profile.languages_spoken
+    : []
   const age = calculateAge(userInfo?.birthdate)
+
+  const matchPrefs = preferences || {}
+  const extra = matchPrefs.extra_options || {}
+  console.log(preferences)
+
   return (
-    <div className="mx-auto w-full h-20 space-y-6 bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
-      <header className="flex items-center justify-between text-lg uppercase tracking-[0.4em] text-primary">
+    <div className="w-full h-full space-y-6 text-white overflow-y-auto p-4">
+      <header className="flex items-center justify-between text-lg uppercase tracking-[0.2em] text-primary">
         <span className="text-white">your profile</span>
       </header>
 
       <div className="flex justify-center">
-        <div className="overflow-hidden rounded-[24px] w-80 h-50">
+        <div className="overflow-hidden rounded-[24px] w-fit h-fit bg-cover">
           <img
             src={photoUrl || DEFAULT_PHOTO}
             alt="primary profile"
@@ -89,20 +95,29 @@ function ProfileView({
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-2">
-        <StatBadge icon="⚡️" label={formatValue(userInfo?.first_name)} />
-        <StatBadge icon="♀" label={formatValue(gender?.name)} />
+        <StatBadge icon="♀" label={formatValue(profile?.gender)} />
         {age !== null && <StatBadge icon="🎂" label={`${age}`} />}
-        <StatBadge icon="📍" label={formatValue(profile?.location_label || profile?.location)} />
-        <StatBadge icon="👁" label={profile?.show_precise_location ? 'Yes' : 'No'} />
+        {/* <StatBadge
+          icon="📍"
+          label={formatValue(profile?.location_label || profile?.location)}
+        />
+        <StatBadge
+          icon="👁"
+          label={profile?.show_precise_location ? 'Yes' : 'No'}
+        /> */}
       </div>
 
       <SectionCard title="about me">
-        {profile?.bio ? profile.bio : 'Share something memorable about yourself.'}
+        {profile?.bio
+          ? profile.bio
+          : 'Share something memorable about yourself.'}
       </SectionCard>
 
       <div className="relative">
         <SectionCard title="relationship goal">
-          {profile?.relationship_goal ? formatValue(profile.relationship_goal) : 'Let people know what you are looking for.'}
+          {profile?.relationship_goal
+            ? formatValue(profile.relationship_goal)
+            : 'Let people know what you are looking for.'}
         </SectionCard>
         <FloatingButton icon="✎" label="Edit profile" onClick={onEdit} />
       </div>
@@ -111,26 +126,56 @@ function ProfileView({
         <dl className="space-y-2 text-base">
           <div className="flex justify-between">
             <dt className="text-[#C7C4A7]">Orientation</dt>
-            <dd>{formatValue(orientation?.name)}</dd>
+            <dd>{formatValue(profile?.orientation)}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-[#C7C4A7]">Pronouns</dt>
             <dd>{formatValue(profile?.pronouns)}</dd>
           </div>
-          <div className="flex justify-between">
+          {languages?.length > 0 && (
+            <div className="flex justify-between">
             <dt className="text-[#C7C4A7]">Languages</dt>
-            {/* <dd className="text-right">{languages.length ? languages.join(', ') : 'add info'}</dd> */}
+            <dd className="text-right">
+              {languages.join(', ')}
+            </dd>
           </div>
+          )}
         </dl>
       </SectionCard>
 
+      {preferences && (
+        <SectionCard title="match preferences">
+          <dl className="space-y-2 text-base">
+            <div className="flex justify-between">
+              <dt className="text-[#C7C4A7]">Looking for</dt>
+              <dd>{formatValue(matchPrefs.target_gender)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-[#C7C4A7]">Age range</dt>
+              <dd>
+                {matchPrefs.age_min}–{matchPrefs.age_max}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-[#C7C4A7]">Max distance</dt>
+              <dd>{matchPrefs.max_distance} miles</dd>
+            </div>
+          </dl>
+        </SectionCard>
+      )}
+
       {interests.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.4em] text-[#C7C4A7]">interests</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#C7C4A7]">
+            interests
+          </p>
           <div className="flex flex-wrap gap-2">
             {interests.map((interest) => (
-              <span key={interest.id} className="rounded-full bg-[#2f2b2b] px-3 py-1 text-sm text-primary">
-                {interest.name}
+              <span
+                key={interest}
+                className="rounded-full bg-[#2f2b2b] px-3 py-1 text-sm text-primary"
+              >
+                {formatValue(interest)}
               </span>
             ))}
           </div>
@@ -139,6 +184,7 @@ function ProfileView({
     </div>
   )
 }
+
 
 function ProfileEdit({
   profile,
@@ -226,18 +272,17 @@ function ProfileEdit({
   return (
     <form
       onSubmit={submit}
-      className="mx-auto w-full max-w-md space-y-6 rounded-[48px] bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]"
+      className="mx-auto w-full h-full overflow-y-auto max-w-md space-y-6 text-white "
     >
-      <header className="flex items-center justify-between text-lg uppercase tracking-[0.4em] text-primary">
+      <header className="flex items-center justify-between text-lg uppercase tracking-[0.2em] text-primary">
         <span className="text-white">edit profile</span>
-        <span>spark</span>
       </header>
 
-      <div className="overflow-hidden rounded-[36px]">
+      <div className="rounded-[36px]">
         <img
           src={photoUrl || DEFAULT_PHOTO}
           alt="primary profile"
-          className="aspect-[10/12] w-full object-cover"
+          className="aspect-[10/12] w-full bg-cover"
         />
       </div>
 
@@ -248,7 +293,7 @@ function ProfileEdit({
           className="rounded-2xl border border-primary px-4 py-2 text-sm uppercase tracking-[0.3em] text-primary hover:bg-primary/10 disabled:opacity-50"
           disabled={uploadingPhoto}
         >
-          {uploadingPhoto ? 'Uploading…' : 'Upload new photo'}
+          <span className='text-neutral-200'>{uploadingPhoto ? 'Uploading…' : 'Upload new photo'}</span>
         </button>
         <input
           ref={fileInputRef}
@@ -350,7 +395,7 @@ function ProfileEdit({
         </button>
         <button
           type="submit"
-          className="grid h-12 w-12 place-content-center rounded-full bg-primary text-2xl text-darkest shadow-lg hover:opacity-80 disabled:opacity-50"
+          className="grid h-12 w-12 place-content-center rounded-full bg-primary text-2xl text-darkest hover:opacity-80 disabled:opacity-50"
           disabled={saving}
           aria-label="Save profile"
         >
@@ -365,9 +410,7 @@ export default function ProfileScreen() {
   const { fetchWithAuth, isAuthenticated } = useAuth()
   const [userInfo, setUserInfo] = useState(null)
   const [profile, setProfile] = useState(null)
-  const [gender, setGender] = useState(null)
-  const [orientation, setOrientation] = useState(null)
-  const [interests, setInterests] = useState([])
+  const [preferences, setPreferences] = useState(null)
   const [photos, setPhotos] = useState([])
   const [mode, setMode] = useState('view')
   const [loading, setLoading] = useState(false)
@@ -379,19 +422,10 @@ export default function ProfileScreen() {
     setLoading(true)
     setError('')
     try {
-      const [
-        profileRes,
-        userRes,
-        genderRes,
-        orientationRes,
-        interestsRes,
-        photosRes,
-      ] = await Promise.all([
-        fetchWithAuth('/profile/me'),
+      const [userRes, profileRes, prefsRes, photosRes] = await Promise.all([
         fetchWithAuth('/user/me'),
-        fetchWithAuth('/profile/me/gender'),
-        fetchWithAuth('/profile/me/orientation'),
-        fetchWithAuth('/profile/me/interests'),
+        fetchWithAuth('/profile/me'),
+        fetchWithAuth('/user/me/preferences'),
         fetchWithAuth('/profile/me/photos'),
       ])
 
@@ -404,13 +438,13 @@ export default function ProfileScreen() {
       }
 
       if (userRes.ok) setUserInfo(await userRes.json())
-      if (genderRes.ok) setGender(await genderRes.json())
-      if (orientationRes.ok) setOrientation(await orientationRes.json())
-      if (interestsRes.ok) setInterests(await interestsRes.json())
+      if (prefsRes.ok) setPreferences(await prefsRes.json())
       if (photosRes.ok) setPhotos(await photosRes.json())
     } catch (err) {
       console.error(err)
-      setError(err?.message || 'Something went wrong while loading your profile.')
+      setError(
+        err?.message || 'Something went wrong while loading your profile.'
+      )
     } finally {
       setLoading(false)
     }
@@ -427,8 +461,12 @@ export default function ProfileScreen() {
   }, [photos])
 
   const interestNames = useMemo(
-    () => interests.map((item) => item.name),
-    [interests],
+    () =>
+      preferences?.extra_options?.interests &&
+      Array.isArray(preferences.extra_options.interests)
+        ? preferences.extra_options.interests
+        : [],
+    [preferences]
   )
 
   const handleSave = useCallback(
@@ -441,20 +479,23 @@ export default function ProfileScreen() {
           bio: partialData.bio ?? profile.bio ?? '',
           drug_use: profile.drug_use ?? false,
           weed_use: profile.weed_use ?? false,
-          gender: gender?.name,
-          orientation: orientation?.name,
+          gender: profile.gender,
+          orientation: profile.orientation,
           interests: interestNames,
           location: partialData.location ?? profile.location ?? '',
-          location_label: partialData.location_label ?? profile.location_label ?? '',
+          location_label:
+            partialData.location_label ?? profile.location_label ?? '',
           show_precise_location:
             typeof partialData.show_precise_location === 'boolean'
               ? partialData.show_precise_location
               : Boolean(profile.show_precise_location),
           pronouns: partialData.pronouns ?? profile.pronouns,
-          languages_spoken: partialData.languages_spoken ?? profile.languages_spoken ?? [],
+          languages_spoken:
+            partialData.languages_spoken ?? profile.languages_spoken ?? [],
           school: profile.school,
           occupation: profile.occupation,
-          relationship_goal: partialData.relationship_goal ?? profile.relationship_goal,
+          relationship_goal:
+            partialData.relationship_goal ?? profile.relationship_goal,
           personality_type: profile.personality_type,
           love_language: profile.love_language,
           attachment_style: profile.attachment_style,
@@ -470,7 +511,9 @@ export default function ProfileScreen() {
         }
 
         if (!payload.gender || !payload.orientation) {
-          throw new Error('Gender and orientation must be set before updating your profile.')
+          throw new Error(
+            'Gender and orientation must be set before updating your profile.'
+          )
         }
 
         const res = await fetchWithAuth('/profile/me', {
@@ -481,7 +524,9 @@ export default function ProfileScreen() {
 
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}))
-          throw new Error(errBody?.detail || errBody?.message || 'Unable to save profile')
+          throw new Error(
+            errBody?.detail || errBody?.message || 'Unable to save profile'
+          )
         }
         await loadData()
         setMode('view')
@@ -492,7 +537,7 @@ export default function ProfileScreen() {
         setSaving(false)
       }
     },
-    [fetchWithAuth, gender?.name, interestNames, loadData, orientation?.name, profile],
+    [fetchWithAuth, interestNames, loadData, profile]
   )
 
   const handleUploadPhoto = useCallback(
@@ -505,7 +550,9 @@ export default function ProfileScreen() {
       })
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}))
-        throw new Error(errBody?.detail || errBody?.message || 'Unable to upload photo')
+        throw new Error(
+          errBody?.detail || errBody?.message || 'Unable to upload photo'
+        )
       }
       await loadData()
     },
@@ -518,7 +565,7 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <div className="text-center text-white">
+      <div className="text-center text-white py-10">
         <p>Loading your profile...</p>
       </div>
     )
@@ -526,8 +573,10 @@ export default function ProfileScreen() {
 
   if (!profile) {
     return (
-      <div className="w-full max-w-md rounded-3xl bg-[#1C1A1A] p-8 text-center text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
-        <p className="text-2xl font-title uppercase tracking-[0.35em]">no profile yet</p>
+      <div className="w-full max-w-md rounded-3xl text-center text-white">
+        <p className="text-2xl font-title uppercase tracking-[0.35em]">
+          no profile yet
+        </p>
         <p className="mt-4 text-lg">
           Tell people about yourself to unlock the live chat experience.
         </p>
@@ -536,7 +585,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full overflow-hidden">
       {error && (
         <div className="mb-4 rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200">
           {error}
@@ -546,9 +595,8 @@ export default function ProfileScreen() {
         <ProfileView
           userInfo={userInfo}
           profile={profile}
-          gender={gender}
-          orientation={orientation}
-          interests={interests}
+          preferences={preferences}
+          interests={interestNames}
           photoUrl={primaryPhoto}
           onEdit={() => setMode('edit')}
         />

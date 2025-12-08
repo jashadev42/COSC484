@@ -8,15 +8,10 @@ export default function SignUpLanding() {
 
   // animations are also included here in addition to the css file
   return (
-    <div className="min-h-screen w-full text-white flex flex-col bg-black">
+    <div className="min-h-screen w-full items-center justify-center text-white flex flex-col bg-black">
 
       {/* The styling applied to the main page image */}
-      <div className="relative w-full h-[55vh] md:h-[70vh] overflow-hidden">
-
-        {/* TitleBarComponent */}
-        <div className="absolute top-0 left-0 right-0 z-30 p-4 animate-fadeDown">
-          <TitleBarComponent/>
-        </div>
+      <div className="relative w-full overflow-hidden">
 
         {/* Main Page image */}
         <img
@@ -34,17 +29,34 @@ export default function SignUpLanding() {
         </div>
       </div>
 
-      {/* the signuplanding message */}
-      <div className="flex-1 flex items-start justify-center px-6 py-10">
-        <div className="w-full max-w-sm text-center">
 
-          {/* Spark "lighting boldt" logo */}
-          <div className="flex items-center justify-center mb-10 opacity-0 animate-fadeIn">
-            <img
-              src="/spark-logo-gold.svg"
-              alt="Spark logo"
-              className="h-40 w-40"
-            />
+      <div className="flex flex-col space-y-10 py-10">
+        <h2 className="text-4xl font-bold tracking-tight w-60 text-center">Keep the Sparks Flying</h2>
+        {/* the signuplanding message */}
+        <div className="flex-1 flex items-start justify-center px-6 py">
+          <div className="w-full max-w-sm text-center">
+
+            {/* Spark "lighting boldt" logo */}
+            <div className="flex items-center justify-center mb-10 opacity-0 animate-fadeIn">
+              <img
+                src="/spark-logo-gold.svg"
+                alt="Spark logo"
+                className="h-40 w-40"
+              />
+            </div>
+
+            {/* Sign Up to Continue mesage */}
+            <h1 className="text-xl font-medium tracking-tight mb-8 text-neutral-200 opacity-0 animate-fadeUp">
+              Sign up to continue
+            </h1>
+
+            {/* Button directing to phoneauthform - changed this to a modal sheet now instead of new page */}
+            <button
+              onClick={() => navigate("/auth/phone", { state: {modal: true} })}
+              className="w-full rounded-2xl px-6 py-4 bg-white text-base font-semibold text-black transition-colors shadow-md hover:bg-neutral-200 opacity-0 animate-fadeUp"
+            >
+              Use phone number
+            </button>
           </div>
 
           {/* Sign Up to Continue mesage */}

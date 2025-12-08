@@ -105,7 +105,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-full w-full flex flex-col p-4">
+    <div className="h-full w-full flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => navigate(-1)}
@@ -154,7 +154,7 @@ export default function ChatPage() {
 
       {!loading && !error && (
         <>
-          <div className="flex-1 max-h-full overflow-y-auto border border-neutral-800 rounded-2xl p-3 space-y-2 bg-neutral-950/60">
+          <div className="flex-1 overflow-y-auto border border-neutral-800 rounded-2xl p-3 space-y-2 ">
             {messages.length === 0 ? (
               <div className="text-center text-neutral-500 pt-8">
                 <p>No messages yet. Say hi 👋</p>
@@ -213,7 +213,7 @@ export default function ChatPage() {
                   isConnected ? "Type a message..." : "Reconnecting..."
                 }
                 disabled={!isConnected}
-                className="flex-1 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                className="flex-1 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none"
               />
               <button
                 onClick={sendMessage}
