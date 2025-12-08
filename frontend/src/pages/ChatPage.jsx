@@ -48,7 +48,7 @@ export default function ChatPage() {
 
   const loadOtherUserPhoto = useCallback(
     async (uid) => {
-      if (!uid) return;
+      if (!uid || otherUserPhoto) return; // <--- guard
       try {
         const res = await fetchWithAuth(`/profile/${uid}/photos`);
         if (!res.ok) return;
@@ -56,23 +56,22 @@ export default function ChatPage() {
         const first =
           Array.isArray(photos) && photos.length > 0 ? photos[0] : null;
         setOtherUserPhoto(first);
-      } catch {
-      }
+      } catch {}
     },
-    [fetchWithAuth]
+    [fetchWithAuth, otherUserPhoto]
   );
+
+  useEffect(() => {
+    if (!chat?.other_user_uid) return;
+    loadOtherUserPhoto(chat.other_user_uid);
+  }, [chat?.other_user_uid, loadOtherUserPhoto]);
+
 
   useEffect(() => {
     if (!chatId) return;
     if (!session?.user?.id) return;
     loadChat();
   }, [chatId, session, loadChat]);
-
-  useEffect(() => {
-    if (chat?.other_user_uid) {
-      loadOtherUserPhoto(chat.other_user_uid);
-    }
-  }, [chat, loadOtherUserPhoto]);
 
   useEffect(() => {
     if (!socket || !isConnected || !chatId) return;
