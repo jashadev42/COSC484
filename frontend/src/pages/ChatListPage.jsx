@@ -102,7 +102,7 @@ export default function ChatListPage() {
       )}
 
       {!loading && viewChats.length > 0 && (
-        <ul className="">
+        <ul className="flex flex-col space-y-1">
           {viewChats.map((chat, i) => (
             <li key={chat.id}>
               <button
