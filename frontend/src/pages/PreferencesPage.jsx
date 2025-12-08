@@ -1,525 +1,567 @@
-// frontend/src/pages/PreferencesPage.jsx
-import React, { useCallback, useEffect, useState } from "react";
-import { useAuth } from "@contexts/AuthContext";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@contexts/AuthContext";
 
-const RELIGIONS = [
-  "christianity",
-  "islam",
-  "judaism",
-  "buddhism",
-  "hinduism",
-  "sikhism",
-  "taoism",
-  "shinto",
-  "atheism",
-  "agnostic",
-  "spiritual",
-  "other",
-];
-
-const DIETS = ["omnivore", "pescetarian", "vegetarian", "vegan", "flexitarian"];
-const EXERCISE_FREQ = ["everyday", "often", "sometimes", "never"];
-const SLEEP_SCHEDULES = ["early_bird", "night_owl", "flexible", "irregular"];
-
-// Allowed pronoun values from backend
-const PRONOUNS = ["any", "she/her", "he/him", "they/them", "she/they", "he/they"];
-
-function parseList(str) {
-  if (!str) return [];
-  return String(str)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-function normaliseArrayish(value) {
-  // DB might send array, string, {}, null, etc.
-  if (Array.isArray(value)) return value;
-  if (typeof value === "string") return parseList(value);
-  if (value && typeof value === "object") return []; // ignore weird legacy shapes
-  return [];
-}
-
-export default function PreferencesPage() {
-  const { fetchWithAuth, isAuthenticated } = useAuth();
+export default function EditPreferencesPage() {
   const navigate = useNavigate();
-
-  const [profile, setProfile] = useState(null);
-  const [gender, setGender] = useState(null);
-  const [orientation, setOrientation] = useState(null);
-  const [genderOptions, setGenderOptions] = useState([]);
-  const [orientationOptions, setOrientationOptions] = useState([]);
-
-  const [form, setForm] = useState({
-    gender: "",
-    orientation: "",
-    pronouns: "any",
-    relationship_goal: "casual dating",
-    religion: "other",
-    diet: "omnivore",
-    exercise_frequency: "sometimes",
-    sleep_schedule: "flexible",
-    location_label: "",
-    location: "",
-    school: "",
-    occupation: "",
-    languages_spoken: "",
-    pets: "",
-    interests: "",
-    bio: "",
-  });
-
+  const { fetchWithAuth } = useAuth();
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  const updateField = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  const toArray = (val) => {
+    if (!val) return [];
+    return Array.isArray(val) ? val : [val];
   };
 
-  const loadData = useCallback(async () => {
-    if (!isAuthenticated) return;
+  // Enum options loaded from API
+  const [enumOptions, setEnumOptions] = useState({
+    genders: [],
+    relationship_goals: [],
+    interests: [],
+    personality_types: [],
+    love_languages: [],
+    languages: [],
+    attachment_styles: [],
+    political_views: [],
+    zodiac_signs: [],
+    religions: [],
+    diets: [],
+    exercise_frequencies: [],
+    pets: [],
+    smoke_frequencies: [],
+    drink_frequencies: [],
+    sleep_schedules: [],
+  });
+  
+  // Core preference state
+  const [preferences, setPreferences] = useState({
+    target_gender: "any",
+    age_min: 18,
+    age_max: 70,
+    max_distance: 50,
+  });
 
-    setLoading(true);
-    setError("");
+  // Extra options state
+  // IMPORTANT: ALL fields are arrays (to widen search criteria) EXCEPT school which is text
+  const [extraOptions, setExtraOptions] = useState({
+    // PREFERENCE FILTERS - All are arrays to allow multiple acceptable values
+    relationship_goal: [],
+    personality_type: [],
+    love_language: [],
+    attachment_style: [],
+    political_view: [],
+    zodiac_sign: [],
+    religion: [],
+    diet: [],
+    exercise_frequency: [],
+    smoke_frequency: [],
+    drink_frequency: [],
+    sleep_schedule: [],
+    
+    // MULTI-SELECT fields (stored in junction tables)
+    interests: [],
+    languages_spoken: [],
+    pets: [],
+    
+    // SPECIAL FIELDS
+    school: "",  // Text field
+    drug_use: [],  // List of acceptable frequencies
+    weed_use: [],  // List of acceptable frequencies
+  });
 
+  useEffect(() => {
+    loadEnumsAndPreferences();
+  }, []);
+
+  const loadAllEnumOptions = async (endpoint) => {
     try {
+      const res = await fetchWithAuth(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data.map(item => item.name || item) : [];
+      }
+    } catch (err) {
+      console.warn(`Failed to load ${endpoint}:`, err);
+    }
+    return [];
+  };
+
+  const loadEnumsAndPreferences = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
       const [
-        profileRes,
-        genderRes,
-        orientationRes,
-        interestsRes,
-        gendersListRes,
-        orientationsListRes,
+        genders,
+        relationship_goals,
+        interests,
+        personality_types,
+        love_languages,
+        languages,
+        attachment_styles,
+        political_views,
+        zodiac_signs,
+        religions,
+        diets,
+        exercise_frequencies,
+        pets,
+        smoke_frequencies,
+        drink_frequencies,
+        sleep_schedules,
       ] = await Promise.all([
-        fetchWithAuth("/profile/me"),
-        fetchWithAuth("/profile/me/gender"),
-        fetchWithAuth("/profile/me/orientation"),
-        fetchWithAuth("/profile/me/interests"),
-        fetchWithAuth("/profile/genders"),
-        fetchWithAuth("/profile/orientations"),
+        loadAllEnumOptions('/profile/genders'),
+        loadAllEnumOptions('/profile/relationship-goals'),
+        loadAllEnumOptions('/profile/interests'),
+        loadAllEnumOptions('/profile/personality-types'),
+        loadAllEnumOptions('/profile/love-languages'),
+        loadAllEnumOptions('/profile/languages'),
+        loadAllEnumOptions('/profile/attachment-styles'),
+        loadAllEnumOptions('/profile/political-views'),
+        loadAllEnumOptions('/profile/zodiac-signs'),
+        loadAllEnumOptions('/profile/religions'),
+        loadAllEnumOptions('/profile/diets'),
+        loadAllEnumOptions('/profile/exercise-frequencies'),
+        loadAllEnumOptions('/profile/pets'),
+        loadAllEnumOptions('/profile/smoke-frequencies'),
+        loadAllEnumOptions('/profile/drink-frequencies'),
+        loadAllEnumOptions('/profile/sleep-schedules'),
       ]);
 
-      if (!profileRes.ok) throw new Error("Failed to load profile");
-      const profileData = await profileRes.json();
-      setProfile(profileData);
-
-      let genderData = null;
-      if (genderRes.ok) {
-        genderData = await genderRes.json();
-        setGender(genderData);
-      }
-
-      let orientationData = null;
-      if (orientationRes.ok) {
-        orientationData = await orientationRes.json();
-        setOrientation(orientationData);
-      }
-
-      let interestsNames = [];
-      if (interestsRes.ok) {
-        const interests = await interestsRes.json();
-        interestsNames = interests.map((i) => i.name);
-      }
-
-      if (gendersListRes.ok) {
-        setGenderOptions(await gendersListRes.json());
-      }
-      if (orientationsListRes.ok) {
-        setOrientationOptions(await orientationsListRes.json());
-      }
-
-      // 💡 Normalise weird DB shapes
-      const languagesArray = normaliseArrayish(profileData.languages_spoken);
-      const petsArray = normaliseArrayish(profileData.pets);
-
-      // 💡 Ensure pronouns is a valid enum, or fall back to "any"
-      const rawPronouns = profileData.pronouns;
-      const safePronouns = PRONOUNS.includes(rawPronouns) ? rawPronouns : "any";
-
-      setForm({
-        gender: genderData?.name || "",
-        orientation: orientationData?.name || "",
-        pronouns: safePronouns,
-        relationship_goal: profileData.relationship_goal || "casual dating",
-        religion: profileData.religion || "other",
-        diet: profileData.diet || "omnivore",
-        exercise_frequency: profileData.exercise_frequency || "sometimes",
-        sleep_schedule: profileData.sleep_schedule || "flexible",
-        location_label: profileData.location_label || "",
-        location: profileData.location || "",
-        school: profileData.school || "",
-        occupation: profileData.occupation || "",
-        languages_spoken: languagesArray.join(", "),
-        pets: petsArray.join(", "),
-        interests: interestsNames.join(", "),
-        bio: profileData.bio || "",
+      setEnumOptions({
+        genders,
+        relationship_goals,
+        interests,
+        personality_types,
+        love_languages,
+        languages,
+        attachment_styles,
+        political_views,
+        zodiac_signs,
+        religions,
+        diets,
+        exercise_frequencies,
+        pets,
+        smoke_frequencies,
+        drink_frequencies,
+        sleep_schedules,
       });
+
+      const res = await fetchWithAuth("/user/me/preferences");
+      
+      if (res.ok) {
+        const data = await res.json();
+        
+        setPreferences({
+          target_gender: data.target_gender || "any",
+          age_min: data.age_min || 18,
+          age_max: data.age_max || 70,
+          max_distance: data.max_distance || 50,
+        });
+
+        if (data.extra_options) {
+          const eo = data.extra_options;
+          setExtraOptions({
+            // ALL PREFERENCE FILTERS: Keep as arrays (already come as arrays from backend)
+            relationship_goal: toArray(eo.relationship_goal),
+            personality_type: toArray(eo.personality_type),
+            love_language: toArray(eo.love_language),
+            attachment_style: toArray(eo.attachment_style),
+            political_view: toArray(eo.political_view),
+            zodiac_sign: toArray(eo.zodiac_sign),
+            religion: toArray(eo.religion),
+            diet: toArray(eo.diet),
+            exercise_frequency: toArray(eo.exercise_frequency),
+            smoke_frequency: toArray(eo.smoke_frequency),
+            drink_frequency: toArray(eo.drink_frequency),
+            sleep_schedule: toArray(eo.sleep_schedule),
+            
+            // MULTI-SELECT: Keep as arrays
+            interests: toArray(eo.interests),
+            languages_spoken: toArray(eo.languages_spoken),
+            pets: toArray(eo.pets),
+            
+            // SPECIAL FIELDS
+            school: eo.school || "",
+            // Filter out booleans, keep only string enum values
+            drug_use: toArray(eo.drug_use).filter(val => typeof val === 'string'),
+            weed_use: toArray(eo.weed_use).filter(val => typeof val === 'string'),
+          });
+
+          const hasExtraOptions = Object.entries(data.extra_options).some(
+            ([key, val]) => {
+              if (key === 'school') return val && val.trim() !== '';
+              if (val === null || val === undefined) return false;
+              if (Array.isArray(val)) return val.length > 0;
+              return true;
+            }
+          );
+          setShowAdvanced(hasExtraOptions);
+        }
+      } else if (res.status !== 404) {
+        throw new Error("Could not load preferences");
+      }
     } catch (err) {
-      console.error(err);
-      setError(err?.message || "Failed to load preferences.");
+      console.error("Error loading:", err);
+      setError("Could not load preferences. Using defaults.");
     } finally {
       setLoading(false);
     }
-  }, [fetchWithAuth, isAuthenticated]);
+  };
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!profile) return;
-
-    setSaving(true);
-    setError("");
-
+  const handleSave = async () => {
     try {
-      const payload = {
-        bio: form.bio ?? profile.bio ?? "",
-        gender: form.gender || (gender?.name ?? ""),
-        orientation: form.orientation || (orientation?.name ?? ""),
-        pronouns: form.pronouns || "any",
-        relationship_goal: form.relationship_goal || "casual dating",
-        religion: form.religion || "other",
-        diet: form.diet || "omnivore",
-        exercise_frequency: form.exercise_frequency || "sometimes",
-        sleep_schedule: form.sleep_schedule || "flexible",
-        location_label: form.location_label || "",
-        location: form.location || "",
-        school: form.school || "",
-        occupation: form.occupation || "",
-        languages_spoken: parseList(form.languages_spoken),
-        pets: parseList(form.pets),
-        interests: parseList(form.interests),
+      setSaving(true);
+      setError("");
 
-        // keep existing / hidden fields
-        drug_use: profile.drug_use ?? false,
-        weed_use: profile.weed_use ?? false,
-        show_precise_location: profile.show_precise_location ?? false,
-        personality_type: profile.personality_type,
-        love_language: profile.love_language,
-        attachment_style: profile.attachment_style,
-        political_view: profile.political_view,
-        zodiac_sign: profile.zodiac_sign,
-        smoke_frequency: profile.smoke_frequency,
-        drink_frequency: profile.drink_frequency,
+      const cleanedExtraOptions = Object.entries(extraOptions).reduce(
+        (acc, [key, value]) => {
+          if (key === "school") {
+            // School is a text field
+            if (value && value.trim() !== "") acc[key] = value.trim();
+          } else if (Array.isArray(value)) {
+            // All other fields are arrays - filter out any non-string values and only include if not empty
+            const filteredValue = value.filter(v => typeof v === 'string' && v !== '');
+            if (filteredValue.length > 0) acc[key] = filteredValue;
+          }
+          return acc;
+        },
+        {}
+      );
+
+      const payload = {
+        target_gender: preferences.target_gender,
+        age_min: Number(preferences.age_min),
+        age_max: Number(preferences.age_max),
+        max_distance: Number(preferences.max_distance),
+        extra_options:
+          Object.keys(cleanedExtraOptions).length > 0 ? cleanedExtraOptions : null,
       };
 
-      if (!payload.gender || !payload.orientation) {
-        throw new Error("Gender and orientation must be set.");
-      }
+      console.log("Sending payload:", payload);
 
-      const res = await fetchWithAuth("/profile/me", {
+      const res = await fetchWithAuth("/user/me/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        console.error("Profile update error:", errBody);
-        throw new Error(
-          errBody?.detail || errBody?.message || "Unable to save preferences"
-        );
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Error response:", errorData);
+        const detail = errorData.detail;
+
+        let msg = "Failed to save preferences";
+        if (typeof detail === "string") msg = detail;
+        else if (Array.isArray(detail))
+          msg = detail.map(d => d.msg || JSON.stringify(d)).join(" | ");
+        else if (detail) msg = JSON.stringify(detail);
+
+        throw new Error(msg);
       }
 
-      await loadData();
       navigate("/settings");
     } catch (err) {
-      console.error(err);
-      setError(err?.message || "Failed to save preferences.");
+      console.error("Error saving preferences:", err);
+      setError(err.message || "Failed to save preferences. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
-  if (!isAuthenticated) return null;
+  const toggleArrayValue = (array, value) => {
+    return array.includes(value)
+      ? array.filter(v => v !== value)
+      : [...array, value];
+  };
+
+  const formatLabel = (str) => {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
 
   if (loading) {
     return (
       <div className="h-full w-full flex items-center justify-center text-white">
-        <p>Loading preferences...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading preferences...</p>
+        </div>
       </div>
     );
   }
 
+  // MULTI SELECT component (used for ALL preference filters to widen the net)
+  const MultiSelectSection = ({ keyName, label, options }) => {
+    if (options.length === 0) return null;
+
+    return (
+      <section key={keyName} className="mb-6 rounded-2xl bg-[#171717] p-4">
+        <h2 className="text-sm uppercase tracking-[0.25em] text-neutral-400 mb-3">
+          {label} (Select Multiple)
+        </h2>
+        <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+          {options.map((option) => (
+            <button
+              key={option}
+              onClick={() => setExtraOptions({
+                ...extraOptions,
+                [keyName]: toggleArrayValue(extraOptions[keyName], option)
+              })}
+              className={`rounded-xl px-3 py-2 text-xs transition ${
+                extraOptions[keyName].includes(option)
+                  ? "bg-purple-600 text-white"
+                  : "bg-[#262626] text-neutral-300 hover:bg-[#303030]"
+              }`}
+            >
+              {formatLabel(option)}
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
   return (
-    <div className="h-full w-full px-4 py-3 text-white overflow-y-auto">
-      <h1 className="text-2xl font-semibold mb-3">Edit preferences</h1>
-      <p className="text-sm text-neutral-400 mb-4">
-        Update how you show up in Spark.
-      </p>
+    <div className="h-full w-full px-4 py-3 text-white overflow-y-auto pb-24">
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => navigate("/settings")}
+          className="text-neutral-400 hover:text-white transition"
+        >
+          ← Back
+        </button>
+        <h1 className="text-2xl font-semibold">Edit Preferences</h1>
+        <div className="w-12"></div>
+      </div>
 
       {error && (
-        <div className="mb-4 rounded-xl bg-red-500/15 px-4 py-3 text-sm text-red-200">
+        <div className="mb-4 rounded-xl bg-red-900/20 border border-red-500/30 p-3 text-sm text-red-300">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 pb-10">
-        {/* Basics */}
-        <section className="rounded-2xl bg-[#171717] p-4 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-            Basics
-          </h2>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Gender
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.gender}
-              onChange={(e) => updateField("gender", e.target.value)}
+      {/* Target Gender - Single Select */}
+      <section className="mb-6 rounded-2xl bg-[#171717] p-4">
+        <h2 className="text-sm uppercase tracking-[0.25em] text-neutral-400 mb-3">
+          Show Me
+        </h2>
+        <div className="space-y-2">
+          {enumOptions.genders.map((gender) => (
+            <button
+              key={gender}
+              onClick={() => setPreferences({ ...preferences, target_gender: gender })}
+              className={`w-full rounded-xl px-4 py-3 text-left text-sm transition ${
+                preferences.target_gender === gender
+                  ? "bg-purple-600"
+                  : "bg-[#262626] text-neutral-300 hover:bg-[#303030]"
+              }`}
             >
-              <option value="">Select gender</option>
-              {genderOptions.map((g) => (
-                <option key={g.id} value={g.name}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Orientation
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.orientation}
-              onChange={(e) => updateField("orientation", e.target.value)}
-            >
-              <option value="">Select orientation</option>
-              {orientationOptions.map((o) => (
-                <option key={o.id} value={o.name}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Pronouns
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.pronouns}
-              onChange={(e) => updateField("pronouns", e.target.value)}
-            >
-              {PRONOUNS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* About & location */}
-        <section className="rounded-2xl bg-[#171717] p-4 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-            About & location
-          </h2>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Bio
-            </label>
-            <textarea
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm min-h-[80px]"
-              value={form.bio}
-              onChange={(e) => updateField("bio", e.target.value)}
-              placeholder="Share something memorable about yourself."
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Relationship goal
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.relationship_goal}
-              onChange={(e) =>
-                updateField("relationship_goal", e.target.value)
-              }
-              placeholder="casual dating, long-term, friends..."
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Location label
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.location_label}
-              onChange={(e) =>
-                updateField("location_label", e.target.value)
-              }
-              placeholder="Baltimore, MD"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Actual location
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.location}
-              onChange={(e) => updateField("location", e.target.value)}
-              placeholder="Neighborhood / city"
-            />
-          </div>
-        </section>
-
-        {/* Lifestyle */}
-        <section className="rounded-2xl bg-[#171717] p-4 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-            Lifestyle
-          </h2>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Religion
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.religion}
-              onChange={(e) => updateField("religion", e.target.value)}
-            >
-              {RELIGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Diet
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.diet}
-              onChange={(e) => updateField("diet", e.target.value)}
-            >
-              {DIETS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Exercise frequency
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.exercise_frequency}
-              onChange={(e) =>
-                updateField("exercise_frequency", e.target.value)
-              }
-            >
-              {EXERCISE_FREQ.map((x) => (
-                <option key={x} value={x}>
-                  {x}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Sleep schedule
-            </label>
-            <select
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.sleep_schedule}
-              onChange={(e) =>
-                updateField("sleep_schedule", e.target.value)
-              }
-            >
-              {SLEEP_SCHEDULES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* Arrays */}
-        <section className="rounded-2xl bg-[#171717] p-4 space-y-4">
-          <h2 className="text-xs uppercase tracking-[0.3em] text-neutral-400">
-            Languages, pets, interests
-          </h2>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Languages spoken
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.languages_spoken}
-              onChange={(e) =>
-                updateField("languages_spoken", e.target.value)
-              }
-              placeholder="english, spanish"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Pets
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.pets}
-              onChange={(e) => updateField("pets", e.target.value)}
-              placeholder="dogs, cats"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Interests
-            </label>
-            <input
-              className="w-full rounded-xl bg-[#262626] px-3 py-2 text-sm"
-              value={form.interests}
-              onChange={(e) => updateField("interests", e.target.value)}
-              placeholder="music, gym, coffee..."
-            />
-          </div>
-        </section>
-
-        <div className="flex gap-3 pb-8">
-          <button
-            type="button"
-            onClick={() => navigate("/settings")}
-            className="flex-1 rounded-xl border border-neutral-600 px-4 py-3 text-sm text-neutral-200"
-            disabled={saving}
-          >
-            <span className="text-neutral-200">Cancel</span>
-          </button>
-          <button
-            type="submit"
-            className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-black disabled:opacity-50"
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save preferences"}
-          </button>
+              <span className="text-neutral-200">{formatLabel(gender)}</span>
+            </button>
+          ))}
         </div>
-      </form>
+      </section>
+
+      {/* Age Range */}
+      <section className="mb-6 rounded-2xl bg-[#171717] p-4">
+        <h2 className="text-sm uppercase tracking-[0.25em] text-neutral-400 mb-3">
+          Age Range
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm text-neutral-300 mb-2">
+              Minimum Age: {preferences.age_min}
+            </label>
+            <input
+              type="range"
+              min="18"
+              max="99"
+              value={preferences.age_min}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setPreferences({
+                  ...preferences,
+                  age_min: val,
+                  age_max: Math.max(val, preferences.age_max),
+                });
+              }}
+              className="w-full h-2 bg-[#262626] rounded-lg appearance-none cursor-pointer accent-purple-600"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-neutral-300 mb-2">
+              Maximum Age: {preferences.age_max}
+            </label>
+            <input
+              type="range"
+              min="18"
+              max="99"
+              value={preferences.age_max}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setPreferences({
+                  ...preferences,
+                  age_max: val,
+                  age_min: Math.min(val, preferences.age_min),
+                });
+              }}
+              className="w-full h-2 bg-[#262626] rounded-lg appearance-none cursor-pointer accent-purple-600"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Distance */}
+      <section className="mb-6 rounded-2xl bg-[#171717] p-4">
+        <h2 className="text-sm uppercase tracking-[0.25em] text-neutral-400 mb-3">
+          Maximum Distance
+        </h2>
+        <div>
+          <label className="block text-sm text-neutral-300 mb-2">
+            {preferences.max_distance} miles
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={preferences.max_distance}
+            onChange={(e) =>
+              setPreferences({ ...preferences, max_distance: parseInt(e.target.value) })
+            }
+            className="w-full h-2 bg-[#262626] rounded-lg appearance-none cursor-pointer accent-purple-600"
+          />
+        </div>
+      </section>
+
+      {/* Advanced Filters Toggle */}
+      <button
+        onClick={() => setShowAdvanced(!showAdvanced)}
+        className="w-full mb-6 rounded-xl bg-[#171717] px-4 py-3 text-left text-sm text-neutral-300 hover:bg-[#262626] transition flex items-center justify-between"
+      >
+        <span className="uppercase tracking-[0.25em] text-neutral-400">
+          Advanced Filters
+        </span>
+        <span className="text-xl">{showAdvanced ? "−" : "+"}</span>
+      </button>
+
+      {/* Advanced Filters */}
+      {showAdvanced && (
+        <>
+          {/* ALL PREFERENCE FIELDS ARE MULTI-SELECT to widen the search net */}
+          <MultiSelectSection
+            keyName="relationship_goal"
+            label="Relationship Goal"
+            options={enumOptions.relationship_goals}
+          />
+          <MultiSelectSection
+            keyName="personality_type"
+            label="Personality Type"
+            options={enumOptions.personality_types}
+          />
+          <MultiSelectSection
+            keyName="love_language"
+            label="Love Language"
+            options={enumOptions.love_languages}
+          />
+          <MultiSelectSection
+            keyName="attachment_style"
+            label="Attachment Style"
+            options={enumOptions.attachment_styles}
+          />
+          <MultiSelectSection
+            keyName="political_view"
+            label="Political View"
+            options={enumOptions.political_views}
+          />
+          <MultiSelectSection
+            keyName="zodiac_sign"
+            label="Zodiac Sign"
+            options={enumOptions.zodiac_signs}
+          />
+          <MultiSelectSection
+            keyName="religion"
+            label="Religion"
+            options={enumOptions.religions}
+          />
+          <MultiSelectSection
+            keyName="diet"
+            label="Diet"
+            options={enumOptions.diets}
+          />
+          <MultiSelectSection
+            keyName="exercise_frequency"
+            label="Exercise Frequency"
+            options={enumOptions.exercise_frequencies}
+          />
+          <MultiSelectSection
+            keyName="smoke_frequency"
+            label="Smoking"
+            options={enumOptions.smoke_frequencies}
+          />
+          <MultiSelectSection
+            keyName="drink_frequency"
+            label="Drinking"
+            options={enumOptions.drink_frequencies}
+          />
+          <MultiSelectSection
+            keyName="sleep_schedule"
+            label="Sleep Schedule"
+            options={enumOptions.sleep_schedules}
+          />
+          <MultiSelectSection
+            keyName="weed_use"
+            label="Weed Use"
+            options={enumOptions.smoke_frequencies}
+          />
+          <MultiSelectSection
+            keyName="drug_use"
+            label="Drug Use"
+            options={enumOptions.smoke_frequencies}
+          />
+
+          {/* MULTI-SELECT JUNCTION TABLE FIELDS */}
+          <MultiSelectSection
+            keyName="interests"
+            label="Interests"
+            options={enumOptions.interests}
+          />
+          <MultiSelectSection
+            keyName="languages_spoken"
+            label="Languages Spoken"
+            options={enumOptions.languages}
+          />
+          <MultiSelectSection
+            keyName="pets"
+            label="Pets"
+            options={enumOptions.pets}
+          />
+
+          {/* School - Text Input (ONLY text field) */}
+          <section className="mb-6 rounded-2xl bg-[#171717] p-4">
+            <h2 className="text-sm uppercase tracking-[0.25em] text-neutral-400 mb-3">
+              School
+            </h2>
+            <input
+              type="text"
+              placeholder="e.g., Harvard University"
+              value={extraOptions.school}
+              onChange={(e) => setExtraOptions({ ...extraOptions, school: e.target.value })}
+              className="w-full rounded-xl bg-[#262626] px-4 py-3 text-sm text-neutral-300 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            />
+          </section>
+        </>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:opacity-50 px-4 py-4 text-white font-semibold transition mb-8"
+      >
+        {saving ? "Saving..." : "Save Preferences"}
+      </button>
     </div>
   );
 }
