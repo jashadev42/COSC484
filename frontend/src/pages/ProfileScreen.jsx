@@ -89,6 +89,7 @@ function ProfileView({
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-2">
+        <StatBadge icon="⚡️" label={formatValue(userInfo?.first_name)} />
         <StatBadge icon="♀" label={formatValue(gender?.name)} />
         {age !== null && <StatBadge icon="🎂" label={`${age}`} />}
         <StatBadge icon="📍" label={formatValue(profile?.location_label || profile?.location)} />

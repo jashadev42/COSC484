@@ -11,6 +11,7 @@ import SparkViewPage from "../pages/SparkViewPage.jsx";
 import ChatListPage from "../pages/ChatListPage.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import SettingsPage from "../pages/SettingsPage.jsx";
+import PreferencesPage from "../pages/PreferencesPage.jsx";
 
 import MatchmakingPage from "../pages/MatchmakingPage.jsx";
 import ProfileScreen from "../pages/ProfileScreen.jsx";
@@ -33,6 +34,7 @@ export default function AppRoutes() {
         <Route path="/chats" element={<ChatListPage />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/preferences" element={<PreferencesPage />} />
       </Route>
 
       {/* Dev only routes */}
