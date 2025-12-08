@@ -5,27 +5,22 @@ export default function SignUpLanding() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full items-center justify-center text-white flex flex-col bg-black">
+    <div className="h-full w-full items-center text-white flex flex-col bg-black ">
 
       {/* The styling applied to the main page image */}
-      <div className="relative w-full overflow-hidden">
-
-        {/* Main Page image */}
+      <div className="w-full overflow-hidden h-fit">
         <img
           src="/signUpLandingCoupleImage.jpg" // online source - Photo by Pavel Danilyuk from Pexels: https://www.pexels.com/photo/man-and-woman-sitting-on-snow-holding-firecracker-6550298/
           alt="Hero"
           className=" w-full h-full max-h-[400px] object-cover opacity-0 animate-fadeIn"
         />
 
-        {/* Dark gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/80 opacity-0 animate-fadeInSlow"></div>
-
-        {/* Text that lays above the image */}
+        <div className="absolute bottom-0 inset-0 bg-linear-to-b from-black/40 to-black/80 opacity-0 animate-fadeInSlow"></div>
       </div>
 
 
-      <div className="flex flex-col space-y-10 py-10">
-        <h2 className="text-4xl font-bold tracking-tight w-60 text-center">Keep the Sparks Flying</h2>
+      <div className="flex flex-col space-y-4 py-10 z-20">
+        <h2 className="text-4xl font-bold tracking-tight text-neutral-200 w-60 text-center">Keep the Sparks Flying</h2>
         {/* the signuplanding message */}
         <div className="flex-1 flex items-start justify-center px-6 py">
           <div className="w-full max-w-sm text-center">

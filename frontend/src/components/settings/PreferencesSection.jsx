@@ -188,7 +188,6 @@ export default function PreferencesSection({ onPreferencesSaved }) {
               return true;
             }
           );
-          setShowAdvanced(hasExtraOptions);
         }
       } else if (res.status !== 404) {
         throw new Error("Could not load preferences");
@@ -251,6 +250,7 @@ export default function PreferencesSection({ onPreferencesSaved }) {
       }
 
       setSaved(true);
+      setShowAdvanced(false);
       setTimeout(() => setSaved(false), 2000);
       
       if (onPreferencesSaved) {
@@ -268,7 +268,6 @@ export default function PreferencesSection({ onPreferencesSaved }) {
     e.preventDefault()
     setPreferences({ ...DEFAULT_PREFERENCES });
     setExtraOptions({ ...DEFAULT_EXTRA_OPTIONS });
-    setShowAdvanced(false);
     setSaved(false);
     setError("");
   };
@@ -442,7 +441,7 @@ export default function PreferencesSection({ onPreferencesSaved }) {
               max={200}
               step={1}
               disabled={saving}
-              className="w-full"
+              className="w-full "
               value={preferences.max_distance}
               onChange={(e) => setPreferences({ ...preferences, max_distance: Number(e.target.value) })}
             />

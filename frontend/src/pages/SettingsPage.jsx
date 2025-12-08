@@ -151,7 +151,7 @@ export default function SettingsPage() {
               onClick={() => setNotifPrefs({ ...DEFAULT_NOTIFICATIONS })}
               className="flex-1 rounded-xl border border-neutral-600 px-4 py-3 text-sm text-neutral-200"
             >
-              Reset
+              <span className="text-neutral-200">Reset</span>
             </button>
             <button
               type="button"

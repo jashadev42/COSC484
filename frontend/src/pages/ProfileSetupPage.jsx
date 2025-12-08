@@ -3,7 +3,7 @@ import { useAuth } from "@contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfileSetupPage() {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, user, refreshUser, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   const [fname, setFname] = useState("");
@@ -19,7 +19,20 @@ export default function ProfileSetupPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Load gender and orientation options from API
+  // Pre-fill form if user data exists
+  useEffect(() => {
+    if (user) {
+      setFname(user.first_name || "");
+      setLname(user.last_name || "");
+      if (user.birthdate) {
+        const date = new Date(user.birthdate);
+        const formatted = date.toISOString().split('T')[0];
+        setBirthdate(formatted);
+      }
+    }
+  }, [user]);
+
+  // Load options
   useEffect(() => {
     async function loadOptions() {
       try {
@@ -41,9 +54,8 @@ export default function ProfileSetupPage() {
         }
       } catch (err) {
         console.error("Failed to load options:", err);
-        // Fallback to hardcoded options if API fails
-        setGenderOptions(["male", "female", "non-binary", "genderqueer", "genderfluid"]);
-        setOrientationOptions(["straight", "gay", "lesbian", "bisexual", "pansexual", "asexual"]);
+        setGenderOptions(["male", "female", "non-binary"]);
+        setOrientationOptions(["straight", "gay", "lesbian", "bisexual"]);
       } finally {
         setLoadingOptions(false);
       }
@@ -58,7 +70,6 @@ export default function ProfileSetupPage() {
     setError("");
 
     try {
-      // 1) Save basic user info (first name, last name, birthdate)
       const birthISO = new Date(birthdate).toISOString();
 
       let res = await fetchWithAuth("/user/me", {
@@ -71,21 +82,14 @@ export default function ProfileSetupPage() {
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        console.error("Error /user/me:", data || res.statusText);
-        throw new Error("Failed to save basic info");
-      }
+      if (!res.ok) throw new Error("Failed to save basic info");
 
-      // 2) Create profile with ONLY required fields (gender and orientation)
-      // Everything else will be NULL and can be filled in later from profile page
       res = await fetchWithAuth("/profile/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          gender: gender,
-          orientation: orientation,
-          // All other fields are optional and will default to NULL
+          gender,
+          orientation,
           bio: null,
           drug_use: null,
           weed_use: null,
@@ -113,14 +117,13 @@ export default function ProfileSetupPage() {
         }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        console.error("Error /profile/me:", data || res.statusText);
-        throw new Error("Failed to initialize profile");
-      }
+      if (!res.ok) throw new Error("Failed to initialize profile");
 
-      // 3) On success, go to profile page where they can complete their profile
-      navigate("/profile");
+      // Refresh auth context
+      // await refreshUser();
+      // await refreshProfile();
+
+      navigate("/spark");
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to complete onboarding");
@@ -130,11 +133,11 @@ export default function ProfileSetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-white">
+    <div className="min-h-screen flex items-center justify-center text-white bg-black">
       <div className="p-6 text-white max-w-md w-full">
         <h1 className="text-2xl font-bold mb-4">Welcome to Spark ✨</h1>
         <p className="text-neutral-400 mb-6 text-sm">
-          Just a few quick details to get started. You can complete your profile later!
+          Just a few quick details to get started!
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -173,7 +176,7 @@ export default function ProfileSetupPage() {
             disabled={loadingOptions}
           >
             <option value="">
-              {loadingOptions ? "Loading genders..." : "Select gender"}
+              {loadingOptions ? "Loading..." : "Select gender"}
             </option>
             {genderOptions.map((g) => (
               <option key={g} value={g}>
@@ -190,7 +193,7 @@ export default function ProfileSetupPage() {
             disabled={loadingOptions}
           >
             <option value="">
-              {loadingOptions ? "Loading orientations..." : "Select orientation"}
+              {loadingOptions ? "Loading..." : "Select orientation"}
             </option>
             {orientationOptions.map((o) => (
               <option key={o} value={o}>
@@ -210,7 +213,7 @@ export default function ProfileSetupPage() {
             disabled={saving || loadingOptions}
             className="w-full p-3 rounded bg-primary text-black font-bold hover:opacity-90 disabled:opacity-50 transition"
           >
-            {saving ? "Setting up..." : loadingOptions ? "Loading..." : "Continue"}
+            {saving ? "Setting up..." : "Continue"}
           </button>
         </form>
       </div>

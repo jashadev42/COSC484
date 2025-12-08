@@ -1,33 +1,192 @@
-// frontend/src/routes/AppRoutes.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@contexts/AuthContext";
 
 import SignUpLanding from "../auth/pages/SignUpLanding.jsx";
 import PhoneOtpPage from "../auth/pages/PhoneOtpPage.jsx";
-
 import ProfileSetupPage from "../pages/ProfileSetupPage.jsx";
 import DevOnboardingPreview from "../pages/DevOnboardingPreview.jsx";
 import SparkViewPage from "../pages/SparkViewPage.jsx";
 import ChatListPage from "../pages/ChatListPage.jsx";
-import ProfilePage from "../pages/ProfilePage.jsx";
 import SettingsPage from "../pages/SettingsPage.jsx";
 import PreferencesPage from "../pages/PreferencesPage.jsx";
-
 import MatchmakingPage from "../pages/MatchmakingPage.jsx";
 import ProfileScreen from "../pages/ProfileScreen.jsx";
 import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
 import ChatPage from "../pages/ChatPage.jsx";
 
+// Loading spinner
+function LoadingScreen() {
+  return (
+    <div className="w-full h-full flex items-center justify-center text-white">
+      <div className="text-center space-y-4">
+        <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+        <p className="text-neutral-400">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Hook to check onboarding status
+function useOnboardingStatus() {
+  const { isAuthenticated, fetchWithAuth } = useAuth();
+  const [checking, setChecking] = useState(true);
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setChecking(false);
+      setOnboardingComplete(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function checkOnboarding() {
+      try {
+        const res = await fetchWithAuth("/user/me");
+        if (!res.ok) {
+          if (mounted) {
+            setOnboardingComplete(false);
+            setChecking(false);
+          }
+          return;
+        }
+
+        const user = await res.json();
+        const hasOnboarding = Boolean(
+          user?.first_name && 
+          user?.last_name && 
+          user?.birthdate
+        );
+
+        if (mounted) {
+          setOnboardingComplete(hasOnboarding);
+          setChecking(false);
+        }
+      } catch (err) {
+        console.error("Failed to check onboarding:", err);
+        if (mounted) {
+          setOnboardingComplete(false);
+          setChecking(false);
+        }
+      }
+    }
+
+    checkOnboarding();
+
+    return () => {
+      mounted = false;
+    };
+  }, [isAuthenticated, fetchWithAuth]);
+
+  return { checking, onboardingComplete };
+}
+
+// Protected route (requires auth + onboarding)
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, hydrated } = useAuth();
+  const { checking, onboardingComplete } = useOnboardingStatus();
+
+  if (!hydrated || (isAuthenticated && checking)) {
+    return <LoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/phone" replace />;
+  }
+
+  if (!onboardingComplete) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return children;
+}
+
+// Onboarding route (requires auth only)
+function OnboardingRoute({ children }) {
+  const { isAuthenticated, hydrated } = useAuth();
+  const { checking, onboardingComplete } = useOnboardingStatus();
+
+  if (!hydrated || (isAuthenticated && checking)) {
+    return <LoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/phone" replace />;
+  }
+
+  if (onboardingComplete) {
+    return <Navigate to="/spark" replace />;
+  }
+
+  return children;
+}
+
+// Public route (redirects if authenticated + onboarded)
+function PublicRoute({ children }) {
+  const { isAuthenticated, hydrated } = useAuth();
+  const { checking, onboardingComplete } = useOnboardingStatus();
+
+  if (!hydrated) {
+    return <LoadingScreen />;
+  }
+
+  // If authenticated, check onboarding
+  if (isAuthenticated) {
+    if (checking) {
+      return <LoadingScreen />;
+    }
+
+    if (onboardingComplete) {
+      return <Navigate to="/spark" replace />;
+    }
+
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  return children;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public / auth flow */}
-      <Route path="/" element={<SignUpLanding />} />
-      <Route path="/auth/phone" element={<PhoneOtpPage />} />
-      <Route path="/onboarding" element={<ProfileSetupPage />} />
+      {/* Public routes */}
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <SignUpLanding />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/phone"
+        element={
+          <PublicRoute>
+            <PhoneOtpPage />
+          </PublicRoute>
+        }
+      />
 
-      {/* Authed app shell with bottom nav */}
-      <Route element={<AuthedAppLayout />}>
+      {/* Onboarding */}
+      <Route
+        path="/onboarding"
+        element={
+          <OnboardingRoute>
+            <ProfileSetupPage />
+          </OnboardingRoute>
+        }
+      />
+
+      {/* Protected routes */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AuthedAppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/spark" element={<SparkViewPage />} />
         <Route path="/matchmaking" element={<MatchmakingPage />} />
         <Route path="/chats/:chatId" element={<ChatPage />} />
@@ -37,11 +196,10 @@ export default function AppRoutes() {
         <Route path="/settings/preferences" element={<PreferencesPage />} />
       </Route>
 
-      {/* Dev only routes */}
+      {/* Dev routes */}
       <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
 
-      {/* Backwards compatibility for legacy /app links */}
-      <Route path="/app/*" element={<Navigate to="/spark" replace />} />
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/spark" replace />} />
     </Routes>
   );
