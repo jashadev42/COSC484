@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@contexts/AuthContext";
+import { LoadingWheel } from "@components/LoadingWheel";
 
 const DEFAULT_PREFERENCES = {
   target_gender: "any",
@@ -328,9 +329,7 @@ export default function PreferencesSection({ onPreferencesSaved }) {
   if (loading) {
     return (
       <section className="mb-6 rounded-2xl bg-[#171717] p-4">
-        <div className="flex items-center justify-center py-8">
-          <span className="text-xs text-neutral-500">Loading preferences...</span>
-        </div>
+        <LoadingWheel/>
       </section>
     );
   }

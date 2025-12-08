@@ -8,14 +8,14 @@ export default function SignUpLanding() {
     <div className="h-full w-full items-center text-white flex flex-col bg-black ">
 
       {/* The styling applied to the main page image */}
-      <div className="w-full overflow-hidden h-fit">
+      <div className="relative w-full overflow-hidden h-fit">
         <img
           src="/signUpLandingCoupleImage.jpg" // online source - Photo by Pavel Danilyuk from Pexels: https://www.pexels.com/photo/man-and-woman-sitting-on-snow-holding-firecracker-6550298/
           alt="Hero"
           className=" w-full h-full max-h-[400px] object-cover opacity-0 animate-fadeIn"
         />
 
-        <div className="absolute bottom-0 inset-0 bg-linear-to-b from-black/40 to-black/80 opacity-0 animate-fadeInSlow"></div>
+        <div className="absolute bottom-0 inset-0 bg-linear-to-b from-black/0 to-black/80 opacity-0 animate-fadeInSlow"></div>
       </div>
 
 

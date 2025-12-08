@@ -1,5 +1,6 @@
 import { useAuth } from '@contexts/AuthContext'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { LoadingWheel } from '@components/LoadingWheel'
 
 const DEFAULT_PHOTO =
 `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -912,9 +913,7 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <div className="text-center text-white py-10">
-        <p>Loading your profile...</p>
-      </div>
+      <LoadingWheel/>
     )
   }
 

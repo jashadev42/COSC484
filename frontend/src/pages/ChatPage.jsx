@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@contexts/AuthContext";
 import { useSocket } from "@contexts/SocketContext";
+import { LoadingWheel } from "@components/LoadingWheel";
 
 export default function ChatPage() {
   const { chatId } = useParams();
@@ -141,9 +142,7 @@ export default function ChatPage() {
       </div>
 
       {loading && (
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-neutral-400">Loading chat…</p>
-        </div>
+        <LoadingWheel/>
       )}
 
       {!loading && error && (

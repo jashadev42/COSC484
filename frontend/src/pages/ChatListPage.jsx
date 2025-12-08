@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@contexts/AuthContext";
+import { LoadingWheel } from "@components/LoadingWheel";
 
 export default function ChatListPage() {
   const { fetchWithAuth } = useAuth();
@@ -92,7 +93,7 @@ export default function ChatListPage() {
     <div className="h-full w-full overflow-y-auto">
       {/* <h1 className="text-2xl font-semibold mb-4">Your chats</h1> */}
 
-      {loading && <p className="text-neutral-400">Loading…</p>}
+      {loading && <LoadingWheel/>}
       {error && <p className="text-red-400">{error}</p>}
 
       {!loading && viewChats.length === 0 && !error && (

@@ -9,23 +9,12 @@ import DevOnboardingPreview from "../pages/DevOnboardingPreview.jsx";
 import SparkViewPage from "../pages/SparkViewPage.jsx";
 import ChatListPage from "../pages/ChatListPage.jsx";
 import SettingsPage from "../pages/SettingsPage.jsx";
-import PreferencesPage from "../pages/PreferencesPage.jsx";
 import MatchmakingPage from "../pages/MatchmakingPage.jsx";
 import ProfileScreen from "../pages/ProfileScreen.jsx";
 import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
 import ChatPage from "../pages/ChatPage.jsx";
+import { LoadingWheel } from "@components/LoadingWheel.jsx";
 
-// Loading spinner
-function LoadingScreen() {
-  return (
-    <div className="w-full h-full flex items-center justify-center text-white">
-      <div className="text-center space-y-4">
-        <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-        <p className="text-neutral-400">Loading...</p>
-      </div>
-    </div>
-  );
-}
 
 // Hook to check onboarding status
 function useOnboardingStatus() {
@@ -89,7 +78,7 @@ function ProtectedRoute({ children }) {
   const { checking, onboardingComplete } = useOnboardingStatus();
 
   if (!hydrated || (isAuthenticated && checking)) {
-    return <LoadingScreen />;
+    return <LoadingWheel />;
   }
 
   if (!isAuthenticated) {
@@ -109,7 +98,7 @@ function OnboardingRoute({ children }) {
   const { checking, onboardingComplete } = useOnboardingStatus();
 
   if (!hydrated || (isAuthenticated && checking)) {
-    return <LoadingScreen />;
+    return <LoadingWheel />;
   }
 
   if (!isAuthenticated) {
@@ -129,13 +118,13 @@ function PublicRoute({ children }) {
   const { checking, onboardingComplete } = useOnboardingStatus();
 
   if (!hydrated) {
-    return <LoadingScreen />;
+    return <LoadingWheel />;
   }
 
   // If authenticated, check onboarding
   if (isAuthenticated) {
     if (checking) {
-      return <LoadingScreen />;
+      return <LoadingWheel />;
     }
 
     if (onboardingComplete) {
@@ -193,7 +182,6 @@ export default function AppRoutes() {
         <Route path="/chats" element={<ChatListPage />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/settings/preferences" element={<PreferencesPage />} />
       </Route>
 
       {/* Dev routes */}
