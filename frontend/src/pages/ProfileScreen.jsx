@@ -459,7 +459,11 @@ function ProfileEdit({
                   : 'bg-[#1a1a1a] text-neutral-300 hover:bg-[#252525]'
               }`}
             >
-              {formatValue(opt)}
+              <span className={` ${
+                values.includes(opt)
+                  ? 'text-black'
+                  : 'text-neutral-300'
+              }`}>{formatValue(opt)}</span>
             </button>
           ))}
         </div>
@@ -685,7 +689,7 @@ function ProfileEdit({
       <div className="flex items-center justify-between pt-4">
         <button
           type="button"
-          className="rounded-full bg-[#2f2b2b] px-6 py-3 uppercase tracking-[0.3em] text-white hover:opacity-80"
+          className="rounded-full bg-red-400 px-6 py-3 uppercase tracking-[0.3em] text-white hover:opacity-80"
           onClick={onCancel}
           disabled={saving}
         >
