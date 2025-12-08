@@ -97,7 +97,7 @@ export default function ChatListPage() {
 
       {!loading && viewChats.length === 0 && !error && (
         <p className="text-sm text-center text-neutral-400">
-          Go find your spark.
+        Go and find your spark!
         </p>
       )}
 

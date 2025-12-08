@@ -21,7 +21,7 @@ export default function SparkViewPage() {
       <div className="w-full max-w-md space-y-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-semibold text-white">
-            How do you want to spark?
+            How do you want to find your spark?
           </h1>
           <p className="text-sm text-neutral-400">
             Choose a mode to start chatting with someone new.
