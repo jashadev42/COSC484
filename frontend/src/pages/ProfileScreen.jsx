@@ -1,5 +1,5 @@
 import { useAuth } from '@contexts/AuthContext'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 const DEFAULT_PHOTO =
 `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -145,6 +145,7 @@ function ProfileEdit({
   saving,
   onCancel,
   onSubmit,
+  onUploadPhoto,
 }) {
   const [formState, setFormState] = useState({
     bio: profile?.bio || '',
@@ -152,7 +153,9 @@ function ProfileEdit({
     location: profile?.location || '',
     pronouns: profile?.pronouns || '',
     relationship_goal: profile?.relationship_goal || '',
-    languages_spoken: (profile?.languages_spoken ?? []).join(', '),
+    languages_spoken: Array.isArray(profile?.languages_spoken)
+      ? profile.languages_spoken.join(', ')
+      : '',
     show_precise_location: Boolean(profile?.show_precise_location),
   })
 
@@ -163,13 +166,44 @@ function ProfileEdit({
       location: profile?.location || '',
       pronouns: profile?.pronouns || '',
       relationship_goal: profile?.relationship_goal || '',
-      languages_spoken: (profile?.languages_spoken ?? []).join(', '),
+      languages_spoken: Array.isArray(profile?.languages_spoken)
+        ? profile.languages_spoken.join(', ')
+        : '',
       show_precise_location: Boolean(profile?.show_precise_location),
     })
   }, [profile])
 
   const updateField = (key, value) => {
     setFormState((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const fileInputRef = useRef(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [photoUploadMessage, setPhotoUploadMessage] = useState('')
+  const [photoUploadError, setPhotoUploadError] = useState('')
+
+  const handlePhotoButtonClick = () => {
+    if (uploadingPhoto) return
+    fileInputRef.current?.click()
+  }
+
+  const handlePhotoSelected = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file || !onUploadPhoto) return
+
+    setPhotoUploadError('')
+    setPhotoUploadMessage('')
+    setUploadingPhoto(true)
+
+    try {
+      await onUploadPhoto(file)
+      setPhotoUploadMessage('Photo uploaded successfully.')
+    } catch (err) {
+      setPhotoUploadError(err?.message || 'Failed to upload photo.')
+    } finally {
+      setUploadingPhoto(false)
+      event.target.value = ''
+    }
   }
 
   const submit = (e) => {
@@ -204,6 +238,30 @@ function ProfileEdit({
           alt="primary profile"
           className="aspect-[10/12] w-full object-cover"
         />
+      </div>
+
+      <div className="flex flex-col space-y-2">
+        <button
+          type="button"
+          onClick={handlePhotoButtonClick}
+          className="rounded-2xl border border-primary px-4 py-2 text-sm uppercase tracking-[0.3em] text-primary hover:bg-primary/10 disabled:opacity-50"
+          disabled={uploadingPhoto}
+        >
+          {uploadingPhoto ? 'Uploading…' : 'Upload new photo'}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoSelected}
+        />
+        {photoUploadMessage && (
+          <p className="text-xs text-emerald-300">{photoUploadMessage}</p>
+        )}
+        {photoUploadError && (
+          <p className="text-xs text-red-400">{photoUploadError}</p>
+        )}
       </div>
 
       <div className="flex flex-col space-y-4">
@@ -436,6 +494,23 @@ export default function ProfileScreen() {
     [fetchWithAuth, gender?.name, interestNames, loadData, orientation?.name, profile],
   )
 
+  const handleUploadPhoto = useCallback(
+    async (file) => {
+      const formData = new FormData()
+      formData.append('photo', file)
+      const res = await fetchWithAuth('/profile/me/photos', {
+        method: 'POST',
+        body: formData,
+      })
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}))
+        throw new Error(errBody?.detail || errBody?.message || 'Unable to upload photo')
+      }
+      await loadData()
+    },
+    [fetchWithAuth, loadData]
+  )
+
   if (!isAuthenticated) {
     return null
   }
@@ -483,6 +558,7 @@ export default function ProfileScreen() {
           saving={saving}
           onCancel={() => setMode('view')}
           onSubmit={handleSave}
+          onUploadPhoto={handleUploadPhoto}
         />
       )}
     </div>
