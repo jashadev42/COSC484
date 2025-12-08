@@ -213,7 +213,7 @@ export default function ChatPage() {
                   isConnected ? "Type a message..." : "Reconnecting..."
                 }
                 disabled={!isConnected}
-                className="flex-1 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                className="flex-1 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-sm text-white focus:outline-none"
               />
               <button
                 onClick={sendMessage}
