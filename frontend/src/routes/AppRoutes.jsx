@@ -1,6 +1,6 @@
 // frontend/src/routes/AppRoutes.jsx
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import SignUpLanding from "../auth/pages/SignUpLanding.jsx";
 import PhoneOtpPage from "../auth/pages/PhoneOtpPage.jsx";
@@ -38,10 +38,14 @@ export default function AppRoutes() {
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/settings/preferences" element={<PreferencesPage />} />
-        </Route>
+      </Route>
 
         {/* Dev only routes */}
         <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
+
+      {/* Backwards compatibility for legacy /app links */}
+      <Route path="/app/*" element={<Navigate to="/spark" replace />} />
+      <Route path="*" element={<Navigate to="/spark" replace />} />
     </Routes>
 
      {/* Public */}

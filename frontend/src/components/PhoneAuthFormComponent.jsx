@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@contexts/AuthContext'
 
 export default function PhoneAuthFormComponent() {
     const { loading, error, setError, otpSent, session, user, requestOtp, verifyOtp, signOut } = useAuth();
     const [phone, setPhone] = useState("");
     const [code, setCode] = useState("");
+    const navigate = useNavigate();
 
     const onGetOtp = useCallback(async (e) => {
         e.preventDefault();
@@ -15,6 +17,12 @@ export default function PhoneAuthFormComponent() {
         e.preventDefault();
         await verifyOtp({ phone, code });
     }, [phone, code, verifyOtp]);
+
+    useEffect(() => {
+        if (session?.access_token) {
+            navigate("/spark", { replace: true });
+        }
+    }, [session?.access_token, navigate]);
 
     return (
         <div className="w-full text-center">
