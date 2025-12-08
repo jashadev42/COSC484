@@ -1,8 +1,8 @@
 // frontend/src/auth/pages/PhoneOtpPage.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import TitleBarComponent from "../../components/TitleBarComponent";
-import PhoneAuthFormComponent from "../../components/PhoneAuthFormComponent";
+import TitleBarComponent from "../../components/TitleBarComponent.jsx";
+import PhoneAuthFormComponent from "../../components/PhoneAuthFormComponent.jsx";
 import { useAuth } from "@contexts/AuthContext.jsx";
 
 export default function PhoneOtpPage() {
@@ -48,12 +48,16 @@ export default function PhoneOtpPage() {
   }, [isAuthenticated, fetchWithAuth, navigate]);
 
   return (
-    <section className="flex flex-col w-full min-h-screen text-white">
-      <TitleBarComponent />
-      <main className="flex w-full justify-center p-4">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div className="bg-neutral-900 text-white rounded-2xl w-full max-w-md p-8 shadow-xl relative animate-fadeUp">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 text-white hover:text-neutral-300 transition">← Back </button>
+        <div className="mb-6">
+          <TitleBarComponent hideLogo />
+        </div>
         <PhoneAuthFormComponent />
-      </main>
-      <footer className="h-8" />
-    </section>
+      </div>
+    </div>
   );
 }
