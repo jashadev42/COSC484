@@ -25,7 +25,7 @@ export default function PhoneAuthFormComponent() {
     }, [session?.access_token, navigate]);
 
     return (
-        <div className="w-full text-center">
+        <div className="min-h-screen w-full flex items-center justify-center p-6 text-white">
             <div className="w-full max-w-sm text-center">
 
         {/* Logo from prev page*/}
