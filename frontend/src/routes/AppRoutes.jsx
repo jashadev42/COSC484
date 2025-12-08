@@ -1,6 +1,6 @@
 // frontend/src/routes/AppRoutes.jsx
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import SignUpLanding from "../auth/pages/SignUpLanding.jsx";
 import PhoneOtpPage from "../auth/pages/PhoneOtpPage.jsx";
@@ -15,28 +15,39 @@ import SettingsPage from "../pages/SettingsPage.jsx";
 import MatchmakingPage from "../pages/MatchmakingPage.jsx";
 import ProfileScreen from "../pages/ProfileScreen.jsx";
 import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
-import ChatPage from "../pages/ChatPage.jsx";
 
 export default function AppRoutes() {
+  const location = useLocation();
+  const state = location.state;
+  const modalBackground = state && state.background;
+
   return (
-    <Routes>
+    <>
       {/* Public / auth flow */}
-      <Route path="/" element={<SignUpLanding />} />
-      <Route path="/auth/phone" element={<PhoneOtpPage />} />
-      <Route path="/onboarding" element={<ProfileSetupPage />} />
+      <Routes location = {modalBackground || location}>
+        <Route path="/" element={<SignUpLanding />} />
+        <Route path="/onboarding" element={<ProfileSetupPage />} />
 
-      {/* Authed app shell with bottom nav */}
-      <Route element={<AuthedAppLayout />}>
-        <Route path="/spark" element={<SparkViewPage />} />
-        <Route path="/matchmaking" element={<MatchmakingPage />} />
-        <Route path="/chats/:chatId" element={<ChatPage />} />
-        <Route path="/chats" element={<ChatListPage />} />
-        <Route path="/profile" element={<ProfileScreen />} />
-        <Route path="/settings" element={<SettingsPage />} />
-      </Route>
+        {/* Authed app shell with bottom nav */}
+        <Route element={<AuthedAppLayout />}>
+          <Route path="/spark" element={<SparkViewPage />} />
+          <Route path="/matchmaking" element={<MatchmakingPage />} />
+          <Route path="/chats" element={<ChatListPage />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
 
-      {/* Dev only routes */}
-      <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
+        {/* Dev only routes */}
+        <Route path="/dev/onboarding" element={<DevOnboardingPreview />} />
     </Routes>
+
+     {/* Public */}
+     {/* Modal Route (implementing for SignUpLanding -> PhoneOtpPage modal sheet) */}
+     {modalBackground && (
+       <Routes>
+        <Route path= "/auth/phone" element={<PhoneOtpPage />}/>
+       </Routes>
+     )}
+   </>
   );
 }
