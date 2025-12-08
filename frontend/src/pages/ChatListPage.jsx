@@ -89,8 +89,8 @@ export default function ChatListPage() {
   }
 
   return (
-    <div className="h-full w-full px-4 py-3">
-      <h1 className="text-2xl font-semibold mb-4">Your chats</h1>
+    <div className="h-full w-full overflow-y-auto">
+      {/* <h1 className="text-2xl font-semibold mb-4">Your chats</h1> */}
 
       {loading && <p className="text-neutral-400">Loading…</p>}
       {error && <p className="text-red-400">{error}</p>}
@@ -102,12 +102,12 @@ export default function ChatListPage() {
       )}
 
       {!loading && viewChats.length > 0 && (
-        <ul className="space-y-3">
-          {viewChats.map((chat) => (
+        <ul className="">
+          {viewChats.map((chat, i) => (
             <li key={chat.id}>
               <button
                 onClick={() => handleOpenChat(chat)}
-                className="w-full flex items-center gap-3 rounded-2xl border-t border-neutral-800 p-2 text-left transition"
+                className={`w-full flex ${i % 2 == 0 ? "bg-neutral-800" : ""} items-center gap-3 rounded-2xl p-2 text-left transition`}
               >
                 {chat.avatarUrl ? (
                   <img

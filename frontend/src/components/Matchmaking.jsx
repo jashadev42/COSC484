@@ -438,49 +438,57 @@ const handleContinueChat = async () => {
     switch (matchmakingState) {
       case "idle":
         return (
-          <div className="matchmaking-idle">
-            <h2>Ready to Connect?</h2>
-            <p>Click below to find someone to chat with</p>
+          <div className="w-full flex flex-col space-y-8">
+            <div className="flex flex-col">
+              <h2>Ready to find a spark?</h2>
+              <p>Click below to find someone to chat with</p>
+            </div>
             <button
               onClick={joinMatchmaking}
-              className="btn-primary bg-primary text-slate-900"
+              className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-black disabled:opacity-50"
             >
               Start Matchmaking
             </button>
+
             {error && <div className="error text-red-500 mt-4">{error}</div>}
           </div>
         );
       case "searching":
         return (
-          <div className="matchmaking-searching">
-            <div className="spinner" />
-            <h2>Finding a Match...</h2>
-            <div className="timer-display">
-              <div className="time-stat">
-                <span className="time-value">{timeElapsed}s</span>
-                <span className="time-label">elapsed</span>
+          <div className="w-full flex flex-col">
+            <div className="flex flex-col mb-4">
+              <h2>Finding a partner...</h2>
+              <div className="flex space-x-4 jusify-center items-center">
+                  <div className="time-stat">
+                    <span className="time-value">{timeElapsed}s</span>
+                    <span className="time-label"> elapsed</span>
+                  </div>
+                  <span>|</span>
+                  <div className="time-stat">
+                    <span className="time-value">{timeRemaining}s</span>
+                    <span className="time-label"> remaining</span>
+                  </div>
+                </div>
+                <p className="search-status">
+                  {timeRemaining > 0
+                    ? "Looking for compatible candidates..."
+                    : "Creating session as host..."}
+                </p>
               </div>
-              <div className="time-divider">|</div>
-              <div className="time-stat">
-                <span className="time-value">{timeRemaining}s</span>
-                <span className="time-label">remaining</span>
-              </div>
-            </div>
-            <p className="search-status">
-              {timeRemaining > 0
-                ? "Looking for compatible users..."
-                : "Creating session as host..."}
-            </p>
-            <button onClick={cancelMatchmaking} className="bg-secondary">
-              Cancel
+            <button
+              onClick={cancelMatchmaking}
+              className="flex-1 rounded-xl bg-secondary px-4 py-3 text-sm font-semibold text-black disabled:opacity-50"
+            >
+              Cancel Matchmaking
             </button>
+            
+            
           </div>
         );
       case "matched":
         return (
           <div className="matchmaking-matched">
-            <div className="success-icon">✓</div>
-            <h2>Match Found!</h2>
+            <h2>{role == 'host' ? 'Created a match' : 'Found a match!'}!</h2>
             <p>
               You are the <strong>{role}</strong>
             </p>

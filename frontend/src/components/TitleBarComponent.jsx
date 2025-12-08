@@ -32,12 +32,12 @@ export default function TitleBarComponent() {
     useEffect(() => { fetchViewUser() }, [fetchWithAuth, isAuthenticated])
 
     return (
-        <div className='w-full h-full text-white flex justify-between'>
+        <div className='w-full h-fit text-white flex justify-between pb-4 px-8 border-b border-neutral-800 mb-4'>
             <div className='flex items-end justify-center space-x-2'>
-                <h1 className='text-4xl tracking-[.025em] font-title font-bold'>{viewUser?.first_name}</h1> {/* Shows the logged in users name just as an example, this would be the person you're chatting with tho */}
+                <h1 className='text-3xl tracking-[.025em] font-title font-bold'>{viewUser?.first_name}</h1> {/* Shows the logged in users name just as an example, this would be the person you're chatting with tho */}
                 <h3 className='text-lg text-primary font-title '>{viewUserAge}</h3>
             </div>
-            <img src={sparkLogo} width={100}/>
+            <img src={sparkLogo} width={70}/>
         </div>
     )
 }

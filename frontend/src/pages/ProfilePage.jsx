@@ -33,7 +33,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center text-black">
+      <div className="min-h-screen w-full flex items-center justify-center text-black py-10">
         <p>Loading your profile…</p>
       </div>
     );
