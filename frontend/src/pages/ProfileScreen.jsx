@@ -73,7 +73,7 @@ function ProfileView({
   const languages = profile?.languages_spoken ?? []
   const age = calculateAge(userInfo?.birthdate)
   return (
-    <div className="mx-auto w-full h-20 space-y-6 bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
+    <div className="mx-auto w-full h-15 space-y-6 bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
       <header className="flex items-center justify-between text-lg uppercase tracking-[0.4em] text-primary">
         <span className="text-white">your profile</span>
       </header>
