@@ -4,12 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 const DEFAULT_PHOTO =
 `data:image/svg+xml;utf8,${encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" style="stop-color:#2c2a2a;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#171616;stop-opacity:1" />
-      </linearGradient>
-    </defs>
     <rect width="600" height="800" fill="url(#grad)" />
     <g fill="#555" font-family="Arial, Helvetica, sans-serif" font-size="46" text-anchor="middle">
       <text x="300" y="360">upload</text>
@@ -79,18 +73,19 @@ function ProfileView({
   const languages = profile?.languages_spoken ?? []
   const age = calculateAge(userInfo?.birthdate)
   return (
-    <div className="mx-auto w-full max-w-md space-y-6 rounded-[48px] bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
+    <div className="mx-auto w-full h-20 space-y-6 bg-[#1C1A1A] p-6 text-white shadow-[0_25px_55px_rgba(0,0,0,0.6)]">
       <header className="flex items-center justify-between text-lg uppercase tracking-[0.4em] text-primary">
         <span className="text-white">your profile</span>
-        <span>spark</span>
       </header>
 
-      <div className="overflow-hidden rounded-[36px]">
-        <img
-          src={photoUrl || DEFAULT_PHOTO}
-          alt="primary profile"
-          className="aspect-[10/12] w-full object-cover"
-        />
+      <div className="flex justify-center">
+        <div className="overflow-hidden rounded-[24px] w-80 h-50">
+          <img
+            src={photoUrl || DEFAULT_PHOTO}
+            alt="primary profile"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -140,21 +135,6 @@ function ProfileView({
           </div>
         </div>
       )}
-
-      <nav className="flex items-center justify-between rounded-full bg-[#0F0E0E] px-6 py-3 text-2xl text-primary">
-        <button type="button" className="hover:opacity-80" aria-label="Explore">
-          ⚡
-        </button>
-        <button type="button" className="hover:opacity-80" aria-label="Chat">
-          💬
-        </button>
-        <button type="button" className="text-white" aria-label="Profile">
-          👤
-        </button>
-        <button type="button" className="hover:opacity-80" aria-label="Settings">
-          ⚙️
-        </button>
-      </nav>
     </div>
   )
 }
