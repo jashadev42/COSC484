@@ -24,15 +24,33 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("authData");
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (parsed?.session?.access_token) {
+        const raw = localStorage.getItem("authData");
+        if (!raw) {
+        setSession(null);
+        setUser(null);
+        return;
+        }
+
+        const parsed = JSON.parse(raw);
+
+        const hasToken = Boolean(parsed?.session?.access_token);
+        const hasUser = Boolean(parsed?.user);
+
+        if (hasToken && hasUser) {
         setSession(parsed.session);
-        setUser(parsed.user ?? null);
-      }
-    } catch (_) {}
-  }, []);
+        setUser(parsed.user);
+        } else {
+        localStorage.removeItem("authData");
+        setSession(null);
+        setUser(null);
+        }
+    } catch (_) {
+        localStorage.removeItem("authData");
+        setSession(null);
+        setUser(null);
+    }
+    }, []);
+
 
   const persist = useCallback((data) => {
     try {
@@ -50,24 +68,30 @@ export function AuthProvider({ children }) {
     } catch (_) {}
   }, []);
 
-  const handleAuthError = useCallback(() => {
-    // Only attempt to sign out and redirect if we aren't already handling a redirect
+    useEffect(() => {
+        const hasToken = Boolean(session?.access_token);
+        const hasUser = Boolean(user);
+
+        if (!hasToken && hasUser) {
+            signOut();
+        }
+    }, [session?.access_token, user, signOut]);
+
+
+    const handleAuthError = useCallback(() => {
     if (isRedirecting) return;
-    
-    // 1. Set the redirecting flag
+
     setIsRedirecting(true);
-    
-    // 2. Clear session and redirect asynchronously
-    // Using Promise.resolve().then() or setTimeout ensures this happens 
-    // after all synchronous component updates in the current render cycle finish.
+
     Promise.resolve().then(() => {
-        // Clear all local session data
-        signOut(); 
-        // Redirect the user
-        window.location.href = "/auth/phone";
+        signOut();
+        if (window.location.pathname !== "/auth/phone") {
+            window.location.href = "/auth/phone";
+        } else {
+        setIsRedirecting(false);
+        }
     });
-    
-  }, [signOut, isRedirecting]); // Depend on isRedirecting to prevent re-triggering
+    }, [signOut, isRedirecting]);
 
   const requestOtp = useCallback(
     async (phone) => {
@@ -183,14 +207,13 @@ export function AuthProvider({ children }) {
   );
 
   const value = useMemo(
-    // ... (value calculation remains the same) ...
     () => ({
       loading,
       error,
       session,
       user,
       otpSent,
-      isAuthenticated: Boolean(session?.access_token),
+      isAuthenticated: Boolean(session?.access_token && user),
       requestOtp,
       verifyOtp,
       fetchWithAuth,
@@ -209,6 +232,7 @@ export function AuthProvider({ children }) {
       signOut,
     ]
   );
+  console.log(value)
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
