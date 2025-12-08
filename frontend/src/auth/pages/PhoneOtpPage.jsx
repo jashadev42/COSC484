@@ -1,4 +1,4 @@
-// src/auth/pages/PhoneOtpPage.jsx
+// frontend/src/auth/pages/PhoneOtpPage.jsx
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TitleBarComponent from "../../components/TitleBarComponent.jsx";
@@ -9,7 +9,6 @@ export default function PhoneOtpPage() {
   const navigate = useNavigate();
   const { isAuthenticated, fetchWithAuth } = useAuth();
 
-  // When the user authenticates, decide where they should go
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -17,18 +16,19 @@ export default function PhoneOtpPage() {
 
     async function decideWhereToGo() {
       try {
+        // Check if profile exists
         const res = await fetchWithAuth("/profile/me");
 
         if (cancelled) return;
 
         if (res.ok) {
-          // Profile exists → go to main app
-          navigate("/spark");
+          // Profile exists → send to main app (pick one)
+          navigate("/spark");    // or "/profile" if you prefer
         } else if (res.status === 404) {
           // No profile yet → go to onboarding
           navigate("/onboarding");
         } else {
-          // Any other error → safest fallback
+          // Some other error – safest is to send to onboarding
           navigate("/onboarding");
         }
       } catch (err) {
