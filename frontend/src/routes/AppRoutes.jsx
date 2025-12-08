@@ -15,6 +15,7 @@ import SettingsPage from "../pages/SettingsPage.jsx";
 import MatchmakingPage from "../pages/MatchmakingPage.jsx";
 import ProfileScreen from "../pages/ProfileScreen.jsx";
 import AuthedAppLayout from "../layouts/AuthedAppLayout.jsx";
+import ChatPage from "../pages/ChatPage.jsx";
 
 export default function AppRoutes() {
   return (
@@ -28,6 +29,7 @@ export default function AppRoutes() {
       <Route element={<AuthedAppLayout />}>
         <Route path="/spark" element={<SparkViewPage />} />
         <Route path="/matchmaking" element={<MatchmakingPage />} />
+        <Route path="/chats/:chatId" element={<ChatPage />} />
         <Route path="/chats" element={<ChatListPage />} />
         <Route path="/profile" element={<ProfileScreen />} />
         <Route path="/settings" element={<SettingsPage />} />
