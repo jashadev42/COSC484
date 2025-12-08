@@ -106,6 +106,23 @@ export function Matchmaking() {
     [stopPolling, isConnected, emit, loadSessionChats, loadMatchStatus]
   );
 
+  const leaveSessionSilently = useCallback(async () => {
+  try {
+    stopPolling();
+    const response = await fetchWithAuth("/matchmaking/me/exit", {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Error leaving session");
+
+    if (isConnected && sessionData) {
+      emit("leave_session", { session_id: sessionData.id });
+    }
+  } catch (err) {
+    console.error("Failed to leave session before continuing chat:", err);
+  }
+}, [stopPolling, fetchWithAuth, isConnected, emit, sessionData]);
+
+
   useEffect(() => {
     fetchWithAuth("/matchmaking/me/config")
       .then((res) => res.json())
@@ -366,19 +383,19 @@ export function Matchmaking() {
     setMessage("");
   };
 
-  const handleContinueChat = () => {
-    if (!mutualMatchInfo?.chatId) return;
-    const chatId = mutualMatchInfo.chatId;
-    if (sessionData && isConnected) {
-      emit("leave_session", { session_id: sessionData.id });
-    }
-    resetToIdle();
-    navigate(`/chats/${chatId}`);
-  };
+const handleContinueChat = async () => {
+  if (!mutualMatchInfo?.chatId) return;
+  const chatId = mutualMatchInfo.chatId;
 
-  const handleContinueMatchmaking = () => {
+  await leaveSessionSilently();
+  resetToIdle();
+  navigate(`/chats/${chatId}`);
+};
+
+
+  const handleContinueMatchmaking = async () => {
     if (sessionData && isConnected) {
-      emit("leave_session", { session_id: sessionData.id });
+      await leaveSessionSilently();
     }
     setMutualMatchInfo(null);
     resetToIdle();
