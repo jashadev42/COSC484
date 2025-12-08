@@ -5,7 +5,7 @@ import { useAuth } from "@contexts/AuthContext";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, fetchWithAuth } = useAuth();
 
   const handleEditPreferences = () => {
     navigate("/settings/preferences");
@@ -14,6 +14,32 @@ export default function SettingsPage() {
   const handleSignOut = async () => {
     await signOut();
     navigate("/"); // back to landing
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "This will permanently delete your Spark account and data. This cannot be undone. Continue?"
+    );
+    if (!confirmed) return;
+
+    try {
+      // If your backend uses a different route, change "/user/me" accordingly.
+      const res = await fetchWithAuth("/user/me", {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.detail || body?.message || "Failed to delete account.");
+      }
+
+      // After deletion, sign the user out and go back to landing
+      await signOut();
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || "Something went wrong deleting your account.");
+    }
   };
 
   return (
@@ -27,7 +53,7 @@ export default function SettingsPage() {
         </h2>
 
         <button
-          onClick={() => navigate("/settings/preferences")}
+          onClick={handleEditPreferences}
           className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm text-neutral-100"
           style={{ color: "white" }}
         >
@@ -35,13 +61,15 @@ export default function SettingsPage() {
         </button>
 
         {/* You can wire these later if you want separate screens */}
-        <button className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm opacity-50 cursor-default"
-        style={{ color: "white" }}
+        <button
+          className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm opacity-50 cursor-default"
+          style={{ color: "white" }}
         >
           Edit distance range (coming soon)
         </button>
-        <button className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm opacity-50 cursor-default"
-        style={{ color: "white" }}
+        <button
+          className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm opacity-50 cursor-default"
+          style={{ color: "white" }}
         >
           Edit notification preferences (coming soon)
         </button>
@@ -59,6 +87,14 @@ export default function SettingsPage() {
           style={{ color: "white" }}
         >
           Sign out
+        </button>
+
+        <button
+          onClick={handleDeleteAccount}
+          className="w-full rounded-xl bg-[#262626] px-4 py-3 text-left text-sm text-red-400 hover:bg-[#4a1f1f] transition"
+          style={{ color: "white" }}
+        >
+          Delete account
         </button>
       </section>
     </div>
