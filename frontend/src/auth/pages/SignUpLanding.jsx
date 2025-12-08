@@ -11,7 +11,7 @@ export default function SignUpLanding() {
       <div className="relative w-full overflow-hidden h-fit">
         <img
           src="/signUpLandingCoupleImage.jpg" // online source - Photo by Pavel Danilyuk from Pexels: https://www.pexels.com/photo/man-and-woman-sitting-on-snow-holding-firecracker-6550298/
-          alt="Hero"
+          alt="Couple sitting in the snow holding sparklers"
           className=" w-full h-full max-h-[400px] object-cover opacity-0 animate-fadeIn"
         />
 
